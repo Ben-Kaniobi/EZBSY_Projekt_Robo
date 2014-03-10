@@ -16,3 +16,11 @@
 *.exe
 *.out
 *.app
+
+# Atollic
+.cproject
+.settings/
+Debug/
+*.elf
+*.elf.launch
+*.ld
