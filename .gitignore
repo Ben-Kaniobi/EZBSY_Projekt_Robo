@@ -23,3 +23,8 @@
 Debug/
 *.elf
 *.elf.launch
+
+# Windows files
+[Tt]humbs.db
+*.DS_Store
+*.lnk
