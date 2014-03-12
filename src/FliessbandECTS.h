@@ -1,24 +1,18 @@
 /**
- * \file    Rangefinder.h
+ * \file    FliessbandECTS.h
  * \author  kasen1
- * \date    2014-01-14
+ * \date    2014-03-12
  *
  * \version 1.0
- *  Softwared tested (14.01.2014)
- * \version 1.0
- *  import from template (14.01.2014)
+ *  import from template (2014-03-12)
  *
- * \brief   task for the rangefinder sensors
- *
- * \defgroup rangefinder Rangefinder
- * \brief   Rangefinder task
- * \ingroup hw_task
+ * \brief   tasks to handle the conveyor and ECTS updater
  *
  * @{
  */
 /* Define to prevent recursive inclusion --------------------------------------*/
-#ifndef LAUFBANDECTS_H_
-#define LAUFBANDECTS_H_
+#ifndef FLIESSBANDECTS_H_
+#define FLIESSBANDECTS_H_
 
 /* exported typedef -----------------------------------------------------------*/
 typedef struct {
@@ -30,16 +24,16 @@ typedef struct {
 
 /* exported define ------------------------------------------------------------*/
 /* Rangefinder-task RTOS configuration */
-#define LAUFBANDECTS_TASK_NAME       "Laufband-ECTS"
-#define LAUFBANDECTS_STACK_SIZE      configMINIMAL_STACK_SIZE /* size of the receive and transmit task */
-#define LAUFBANDECTS_TASK_PRIORITY   (configMAX_PRIORITIES - 4UL) /* priority 4*/
+#define FLIESSBANDECTS_TASK_NAME       "Fliessband-ECTS"
+#define FLIESSBANDECTS_STACK_SIZE      configMINIMAL_STACK_SIZE /* size of the receive and transmit task */
+#define FLIESSBANDECTS_TASK_PRIORITY   (configMAX_PRIORITIES - 4UL) /* priority 4*/
 
 /* exported macro -------------------------------------------------------------*/
 
 /* exported variables ---------------------------------------------------------*/
 
 /* exported function prototypes -----------------------------------------------*/
-extern void initLaufbandECTSTask(void);
+extern void initFliessbandECTSTasks(void);
 
 #endif /* LAUFBANDECTS_H_ */
 

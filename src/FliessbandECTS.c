@@ -23,7 +23,7 @@
  ******************************************************************************/
 
 //----- Header-Files -----------------------------------------------------------
-#include "LaufbandECTS.h"                        /* GUI Library                        */
+#include "FliessbandECTS.h"
 #include "carme_io1.h"                  /* CARMEIO1 Board Support Package     */
 
 #include <stdio.h>                      /* Standard Input/Output              */
@@ -42,10 +42,10 @@
 #define NO_MASK (0xFF)
 
 //----- Data types -------------------------------------------------------------
-xTaskHandle xLaufbandECTSHandle = NULL;
+xTaskHandle xFliessbandECTSHandle = NULL;
 
 //----- Function prototypes ----------------------------------------------------
-static void  vLaufbandECTSTask(void *pvData);
+static void  vFliessbandECTSTask(void *pvData);
 
 //----- Data -------------------------------------------------------------------
 
@@ -61,9 +61,9 @@ static void  vLaufbandECTSTask(void *pvData);
  *  \return       error code
  *
  ******************************************************************************/
-void  initLaufbandECTSTask(void) {
+void  initFliessbandECTSTasks(void) {
 
-	xTaskCreate(vLaufbandECTSTask, (signed char *) LAUFBANDECTS_TASK_NAME, LAUFBANDECTS_STACK_SIZE, NULL, LAUFBANDECTS_TASK_PRIORITY, &xLaufbandECTSHandle);
+	xTaskCreate(vFliessbandECTSTask, (signed char *) FLIESSBANDECTS_TASK_NAME, FLIESSBANDECTS_STACK_SIZE, NULL, FLIESSBANDECTS_TASK_PRIORITY, &xFliessbandECTSHandle);
 }
 
 /*******************************************************************************
@@ -79,7 +79,7 @@ void  initLaufbandECTSTask(void) {
  *  \return       void
  *
  ******************************************************************************/
-static void vLaufbandECTSTask(void *pvData) {
+static void vFliessbandECTSTask(void *pvData) {
 
 	/* We need to initialise xLastFlashTime prior to the first call to vTaskDelayUntil() */
     portTickType xLastFlashTime;

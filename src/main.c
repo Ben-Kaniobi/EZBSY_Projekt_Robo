@@ -26,7 +26,7 @@
 /* RTOS */
 #include <memPoolService.h>
 /* Application */
-#include "LaufbandECTS.h"
+#include "FliessbandECTS.h"
 
 //----- Macros -----------------------------------------------------------------
 //----- Data types -------------------------------------------------------------
@@ -50,7 +50,7 @@ int  main(void) {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
     /* module initialisation */
-    initLaufbandECTSTask();
+    initFliessbandECTSTasks();
 
     vTaskStartScheduler();
 
