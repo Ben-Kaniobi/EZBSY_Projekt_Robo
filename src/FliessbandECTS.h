@@ -18,7 +18,9 @@
 typedef struct {
 	unsigned int x;
 	unsigned int y;
-	unsigned int z; //Evtl. enum
+	enum {Laufband1, Laufband2, Laufband3,
+		Robo1, Ablage11, Ablage12, Ablage13,
+		Robo2, Ablage21, Ablage22, Ablage23} z;
 	enum {Schwarz, Grau} Farbe;
 } ECTS;
 
