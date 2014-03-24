@@ -76,10 +76,11 @@ extern "C" {
 
 /*----- Header-Files -------------------------------------------------------*/
 #include <stm32f4xx.h>				/* Processor STM32F407IG				*/
+#include <carme.h>					/* CARME Module							*/
 
 /*----- Macros -------------------------------------------------------------*/
 /* error codes */
-#define	CARME_ERROR_RTC		CARME_ERROR_RTC_BASE + 0	/**< \brief Common RTC error		*/
+#define	CARME_ERROR_RTC		CARME_ERROR_RTC_BASE + 0	/**< Common RTC error		*/
 
 #ifndef CARME_RTC_USE_WAKEUP_ISR
 #define CARME_RTC_USE_WAKEUP_ISR	0	/**< Disable wakeup interrupt		*/
@@ -87,9 +88,7 @@ extern "C" {
 
 /*----- Data types ---------------------------------------------------------*/
 /**
- * \struct	_CARME_RTC_TIME_t
- * \typedef	CARME_RTC_TIME_t
- * \brief	Structure to store a full date and time.
+ * @brief	Structure to store a full date and time.
  */
 typedef struct _CARME_RTC_TIME_t {
 	uint8_t sec;					/**< Seconds:			range 0-59		*/
@@ -103,9 +102,7 @@ typedef struct _CARME_RTC_TIME_t {
 
 #if CARME_RTC_USE_WAKEUP_ISR==1
 /**
- * \struct	_CARME_RTC_WAKEUP_t
- * \typedef	CARME_RTC_WAKEUP_t
- * \brief	Structure to store a full date and time.
+ * @brief	Structure to store a full date and time.
  */
 typedef enum _CARME_RTC_WAKEUP_t {
 	CARME_RTC_WAKEUP_STOP =0,		/**< Wakeup Interrupt disable			*/

@@ -154,7 +154,7 @@ g_pfnVectors:
 	.word	CAN1_RX0_IRQHandler				/* CAN1 RX0						*/
 	.word	CAN1_RX1_IRQHandler				/* CAN1 RX1						*/
 	.word	CAN1_SCE_IRQHandler				/* CAN1 SCE						*/
-	.word	EXTI9_5_IRQHandler				/* External Line[9:5]s			*/
+	.word	EXTI9_5_IRQHandler       		/* External Line[9:5]s			*/
 	.word	TIM1_BRK_TIM9_IRQHandler		/* TIM1 Break and TIM9			*/
 	.word	TIM1_UP_TIM10_IRQHandler		/* TIM1 Update and TIM10		*/
 	.word	TIM1_TRG_COM_TIM11_IRQHandler	/* TIM1 Trigger and Commutation and TIM11 */

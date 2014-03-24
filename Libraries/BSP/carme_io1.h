@@ -80,15 +80,29 @@ extern "C" {
 
 /*----- Data types ---------------------------------------------------------*/
 /**
- * \enum	_CARME_IO1_PIO_PORT
- * \typedef	CARME_IO1_PIO_PORT
- * \brief	PIO Port names.
+ * @brief	This enum contains all available Ports of the PIO device
  */
 typedef enum _CARME_IO1_PIO_PORT {
-	CARME_IO1_PORTA = 0,	/**< PIO Port A									*/
-	CARME_IO1_PORTB = 8,	/**< PIO Port B									*/
-	CARME_IO1_PORTC = 16	/**< PIO Port C									*/
+	CARME_IO1_PORT_A,				/**< Port A [PA0 ... PA7] */
+//	CARME_IO1_PORT_B,
+	CARME_IO1_PORT_C,				/**< Port C [PC0 ... PC7] */
+	CARME_IO1_PORT_C_L,				/**< Port C [PC0 ... PC3] */
+	CARME_IO1_PORT_C_H				/**< Port C [PC4 ... PC7] */
 } CARME_IO1_PIO_PORT;
+
+/**
+ * @brief	This contains all possible commands for the PIO device
+ */
+typedef enum _CARME_IO1_PIO_CONTROL {
+	CARME_IO1_PORT_A_IN = 0x01,		/**< input Port A					*/
+	CARME_IO1_PORT_A_OUT = 0x02,	/**< ouput Port A					*/
+	CARME_IO1_PORT_C_IN = 0x04,		/**< input Port C					*/
+	CARME_IO1_PORT_C_OUT = 0x08,	/**< output Port C					*/
+	CARME_IO1_PORT_C_L_IN = 0x10,	/**< input Port C [PC0 ... PC3]		*/
+	CARME_IO1_PORT_C_L_OUT = 0x20,	/**< output Port C [PC0 ... PC3]	*/
+	CARME_IO1_PORT_C_H_IN = 0x40,	/**< input Port C [PC4 ... PC7]		*/
+	CARME_IO1_PORT_C_H_OUT = 0x80	/**< output Port C [PC4 ... PC7]	*/
+} CARME_IO1_PIO_CONTROL;
 
 /*----- Function prototypes ------------------------------------------------*/
 extern void CARME_IO1_Init(void);
@@ -96,10 +110,11 @@ extern void CARME_IO1_LED_Set(uint8_t write, uint8_t mask);
 extern inline void CARME_IO1_LED_Get(uint8_t *pStatus);
 extern inline void CARME_IO1_SWITCH_Get(uint8_t *pStatus);
 extern void CARME_IO1_BUTTON_Get(uint8_t *pStatus);
-extern void CARME_IO1_PIO_Set(CARME_IO1_PIO_PORT port, uint8_t write,
-                              uint8_t mask);
-extern inline void CARME_IO1_PIO_Get(CARME_IO1_PIO_PORT port,
-                                     uint8_t *pStatus);
+extern void CARME_IO1_PIO_Write(CARME_IO1_PIO_PORT port, uint8_t data);
+extern void CARME_IO1_PIO_Read(CARME_IO1_PIO_PORT port, uint8_t *data);
+extern void CARME_IO1_PIO_Set(CARME_IO1_PIO_PORT port, uint8_t pio);
+extern void CARME_IO1_PIO_Clear(CARME_IO1_PIO_PORT port, uint8_t pio);
+extern void CARME_IO1_PIO_Control(CARME_IO1_PIO_CONTROL cmd);
 
 /*----- Data ---------------------------------------------------------------*/
 

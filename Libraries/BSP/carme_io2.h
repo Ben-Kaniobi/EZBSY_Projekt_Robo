@@ -75,6 +75,7 @@ extern "C" {
 
 /*----- Header-Files -------------------------------------------------------*/
 #include <stm32f4xx.h>				/* Processor STM32F407IG				*/
+#include <carme.h>					/* CARME Module							*/
 
 /*----- Macros -------------------------------------------------------------*/
 #define CARME_ERROR_IO2_NO_DATA				(CARME_ERROR_IO2_BASE + 0)	/**< No data available		*/
@@ -99,9 +100,7 @@ extern "C" {
 
 /*----- Data types ---------------------------------------------------------*/
 /**
- * \enum	_CARME_IO2_ADC_CHANNEL
- * \typedef	CARME_IO2_ADC_CHANNEL
- * \brief	ADC port names.
+ * @brief	ADC port names.
  */
 typedef enum _CARME_IO2_ADC_CHANNEL {
 	CARME_IO2_ADC_PORT0 = 0,			/**< Port 0, Poti					*/
@@ -110,9 +109,7 @@ typedef enum _CARME_IO2_ADC_CHANNEL {
 } CARME_IO2_ADC_CHANNEL;
 
 /**
- * \enum	_CARME_IO2_GPIO_OUT_MODE
- * \typedef	CARME_IO2_GPIO_OUT_MODE
- * \brief	GPIO Out mode definitions.
+ * @brief	GPIO Out mode definitions.
  */
 typedef enum _CARME_IO2_GPIO_OUT_MODE {
 	CARME_IO2_GPIO_OUT_MODE_GPIO = GPIO_Mode_OUT,	/**< GPIO Out mode as
@@ -122,9 +119,7 @@ typedef enum _CARME_IO2_GPIO_OUT_MODE {
 } CARME_IO2_GPIO_OUT_MODE;
 
 /**
- * \enum	_CARME_IO2_DAC_CHANNEL
- * \typedef	CARME_IO2_DAC_CHANNEL
- * \brief	DAC port names.
+ * @brief	DAC port names.
  */
 typedef enum _CARME_IO2_DAC_CHANNEL {
 	CARME_IO2_DAC_OUT0 = CARME_IO2_LTC2622_ADDR_A,	/**< DAC Out 0			*/
@@ -133,9 +128,7 @@ typedef enum _CARME_IO2_DAC_CHANNEL {
 } CARME_IO2_DAC_CHANNEL;
 
 /**
- * \enum	_CARME_IO2_SPI_CHANNEL
- * \typedef	CARME_IO2_SPI_CHANNEL
- * \brief	ADC port names.
+ * @brief	ADC port names.
  */
 typedef enum _CARME_IO2_SPI_CHANNEL {
 	CARME_IO2_nPSC0 = 0,				/**< DAC, SPI0						*/
@@ -143,9 +136,7 @@ typedef enum _CARME_IO2_SPI_CHANNEL {
 } CARME_IO2_SPI_CHANNEL;
 
 /**
- * \enum	_CARME_IO2_PWM_CHANNEL
- * \typedef	CARME_IO2_PWM_CHANNEL
- * \brief	PWM port names.
+ * @brief	PWM port names.
  */
 typedef enum _CARME_IO2_PWM_CHANNEL {
 	CARME_IO2_PWM0,						/**< PWM0							*/
@@ -155,9 +146,7 @@ typedef enum _CARME_IO2_PWM_CHANNEL {
 } CARME_IO2_PWM_CHANNEL;
 
 /**
- * \enum	_CARME_IO2_PWM_PHASE
- * \typedef	CARME_IO2_PWM_PHASE
- * \brief	DC motor direction.
+ * @brief	DC motor direction.
  */
 typedef enum _CARME_IO2_PWM_PHASE {
 	CARME_IO2_PWM_NORMAL_DIRECTION,		/**< Forward						*/

@@ -87,23 +87,23 @@ extern "C" {
 #define CARME_CAN_BAUD_1M			1000000		/**< Baudrade 1M			*/
 
 /* error codes */
-#define	CARME_ERROR_CAN							CARME_ERROR_CAN_BASE + 0	/**< \brief Common CAN error		*/
-#define CARME_ERROR_CAN_INVALID_BAUDRATE		CARME_ERROR_CAN_BASE + 1	/**< \brief Invalid baudrate		*/
-#define CARME_ERROR_CAN_RXFIFO_EMPTY			CARME_ERROR_CAN_BASE + 2	/**< \brief RxFIFO empty			*/
-#define CARME_ERROR_CAN_INVALID_MODE			CARME_ERROR_CAN_BASE + 3	/**< \brief Invalid mode			*/
-#define CARME_ERROR_CAN_INVALID_OPMODE			CARME_ERROR_CAN_BASE + 4	/**< \brief Invalid opmode			*/
-#define CARME_ERROR_CAN_INVALID_ACCEPTANCE_MODE	CARME_ERROR_CAN_BASE + 5	/**< \brief Invalid acceptance mode	*/
-#define CARME_ERROR_CAN_ERROR_STATUS			CARME_ERROR_CAN_BASE + 6	/**< \brief Status error			*/
+#define	CARME_ERROR_CAN							CARME_ERROR_CAN_BASE + 0	/**< Common CAN error		*/
+#define CARME_ERROR_CAN_INVALID_BAUDRATE		CARME_ERROR_CAN_BASE + 1	/**< Invalid baudrate		*/
+#define CARME_ERROR_CAN_RXFIFO_EMPTY			CARME_ERROR_CAN_BASE + 2	/**< RxFIFO empty			*/
+#define CARME_ERROR_CAN_INVALID_MODE			CARME_ERROR_CAN_BASE + 3	/**< Invalid mode			*/
+#define CARME_ERROR_CAN_INVALID_OPMODE			CARME_ERROR_CAN_BASE + 4	/**< Invalid opmode			*/
+#define CARME_ERROR_CAN_INVALID_ACCEPTANCE_MODE	CARME_ERROR_CAN_BASE + 5	/**< Invalid acceptance mode*/
+#define CARME_ERROR_CAN_ERROR_STATUS			CARME_ERROR_CAN_BASE + 6	/**< Status error			*/
 
 /* interrupt enable flags */
-#define CARME_CAN_INT_BUSERR		(SJA1000_IER_BEIE)	/**< \brief Bus Error Interrupt Enable			*/
-#define CARME_CAN_INT_ARBIT_LOST	(SJA1000_IER_ALIE)	/**< \brief Arbitration Lost Interrupt Enable	*/
-#define CARME_CAN_INT_PASSIVE		(SJA1000_IER_EPIE)	/**< \brief Error Passive Interrupt Enable		*/
-#define CARME_CAN_INT_WAKEUP		(SJA1000_IER_WUIE)	/**< \brief Wake-up Interrupt Enable			*/
-#define CARME_CAN_INT_OVERRUN		(SJA1000_IER_DOIE)	/**< \brief Data overrun Interrupt Enable		*/
-#define CARME_CAN_INT_ERROR			(SJA1000_IER_EIE)	/**< \brief Error Warning Interrupt Enable		*/
-#define CARME_CAN_INT_TX			(SJA1000_IER_TIE)	/**< \brief Transmit Interrupt Enable			*/
-#define CARME_CAN_INT_RX			(SJA1000_IER_RIE)	/**< \brief Receive Interrupt Enable			*/
+#define CARME_CAN_INT_BUSERR		(SJA1000_IER_BEIE)	/**< Bus Error Interrupt Enable			*/
+#define CARME_CAN_INT_ARBIT_LOST	(SJA1000_IER_ALIE)	/**< Arbitration Lost Interrupt Enable	*/
+#define CARME_CAN_INT_PASSIVE		(SJA1000_IER_EPIE)	/**< Error Passive Interrupt Enable		*/
+#define CARME_CAN_INT_WAKEUP		(SJA1000_IER_WUIE)	/**< Wake-up Interrupt Enable			*/
+#define CARME_CAN_INT_OVERRUN		(SJA1000_IER_DOIE)	/**< Data overrun Interrupt Enable		*/
+#define CARME_CAN_INT_ERROR			(SJA1000_IER_EIE)	/**< Error Warning Interrupt Enable		*/
+#define CARME_CAN_INT_TX			(SJA1000_IER_TIE)	/**< Transmit Interrupt Enable			*/
+#define CARME_CAN_INT_RX			(SJA1000_IER_RIE)	/**< Receive Interrupt Enable			*/
 
 /* driver flags */
 #define CARME_CAN_DF_RESET			0x00	/**< RM-Bit in MOD register set		*/
@@ -113,8 +113,7 @@ extern "C" {
 
 /*----- Data types ---------------------------------------------------------*/
 /**
- * \enum	CARME_CAN_IRQ_CALLBACKS
- * \brief	Interrupt sources of the CAN-Controller
+ * @brief	Interrupt sources of the CAN-Controller
  */
 enum CARME_CAN_IRQ_CALLBACKS {
 	CARME_CAN_IRQID_RX_INTERRUPT = 0,			/**< Telegram received Interrupt							*/
@@ -130,36 +129,32 @@ enum CARME_CAN_IRQ_CALLBACKS {
 };
 
 /**
- * \struct	_CARME_CAN_MESSAGE
- * \typedef	CARME_CAN_MESSAGE
- * \brief	This struct encapsulates a CAN message.
+ * @brief	This struct encapsulates a CAN message.
  */
 typedef struct _CARME_CAN_MESSAGE {
-	uint32_t id;		/**< standard or extended Identifier */
+	uint32_t id;		/**< standard or extended Identifier						*/
 	uint8_t ext;		/**< Frame format:
-							 \arg 0: Standard Frame Format (SFF)
-							 \arg 1: Extended Frame Format (EFF) */
-	uint8_t rtr;		/**< If 1 the RTR Bit was set in the received CAN message */
-	uint8_t dlc;		/**< Number of data-bytes in the received CAN message */
-	uint8_t data[8];	/**< Array with received databytes */
+							 @arg 0: Standard Frame Format (SFF)
+							 @arg 1: Extended Frame Format (EFF)					*/
+	uint8_t rtr;		/**< If 1 the RTR Bit was set in the received CAN message	*/
+	uint8_t dlc;		/**< Number of data-bytes in the received CAN message		*/
+	uint8_t data[8];	/**< Array with received databytes							*/
 } CARME_CAN_MESSAGE;
 
 /**
- * \enum	CARME_CAN_ACCEPTANCE_FILTER_MODE
- * \brief	Acceptance filter modes  \see CARME_CAN_setAcceptaceFilter()
+ * @brief	Acceptance filter modes
+ * @see		@ref CARME_CAN_SetAcceptaceFilter()
  */
 enum CARME_CAN_ACCEPTANCE_FILTER_MODE {
 	MODE_SINGLE = 1,	/**< single acceptance filter option is enabled
-							 (one filter with the length of 32 bits) */
+							 (one filter with the length of 32 bits)		*/
 	MODE_DUAL = 2		/**< dual acceptance filter option is enabled
-							 (two filters with the length of 16 bits) */
+							 (two filters with the length of 16 bits)		*/
 };
 
 /**
- * \struct	_CARME_CAN_ACCEPTANCE_FILTER
- * \typedef	CARME_CAN_ACCEPTANCE_FILTER
- * \brief	Information about the acceptance filter.
- * \see		CARME_CAN_setAcceptaceFilter()
+ * @brief	Information about the acceptance filter.
+ * @see		@ref CARME_CAN_SetAcceptaceFilter()
  */
 typedef struct _CARME_CAN_ACCEPTANCE_FILTER {
 	uint8_t acr[4];		/**< Content of the 4 Accept Filter Code Register	*/
@@ -168,8 +163,7 @@ typedef struct _CARME_CAN_ACCEPTANCE_FILTER {
 } CARME_CAN_ACCEPTANCE_FILTER;
 
 /**
- * \typedef	IRQ_CALLBACK
- * \brief	Pointer to a function.
+ * @brief	Pointer to a function.
  */
 typedef void (*IRQ_CALLBACK)();
 
