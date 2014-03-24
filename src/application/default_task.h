@@ -1,5 +1,5 @@
-#ifndef DEFAULT_TASK_H_
-#define DEFAULT_TASK_H_
+#ifndef __APP_DEFAULT_TASK_H_
+#define __APP_DEFAULT_TASK_H_
 /******************************************************************************/
 /*! \file default_task.h
 ******************************************************************************
@@ -49,4 +49,4 @@ extern void InitDefaultTask(void);
 /* ****************************************************************************/
 /* End Header : default_task.h												  */
 /* ****************************************************************************/
-#endif /* DEFAULT_TASK_H_ */
+#endif /* __APP_DEFAULT_TASK_H_ */
