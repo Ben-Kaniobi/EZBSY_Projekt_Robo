@@ -12,7 +12,7 @@
  */
 
 /* Includes -------------------------------------------------------------------*/
-#include "ECTS_updater.h"
+#include "ECTS_updater_task.h"
 #include "carme_io1.h"                   /* CARMEIO1 Board Support Package     */
 
 #include <stdio.h>                       /* Standard Input/Output              */

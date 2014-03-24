@@ -26,12 +26,15 @@
 /* RTOS */
 #include <memPoolService.h>
 /* Application */
-#include "ECTS_updater.h"
+#include "ECTS_updater_task.h"
+#include  "inc/lcd.h"                           /* Graphic Library                */
+#include <ff.h>
 
 //----- Macros -----------------------------------------------------------------
 //----- Data types -------------------------------------------------------------
 //----- Function prototypes ----------------------------------------------------
 //----- Data -------------------------------------------------------------------
+FATFS main_fs;
 //----- Implementation ---------------------------------------------------------
 
 /*******************************************************************************
@@ -51,6 +54,15 @@ int  main(void) {
 
     /* module initialisation */
 	init_ECTS_updater_tasks();
+
+	LCD_Init();
+
+	LCD_SetFont(&font_8x13);
+	if (f_mount(&main_fs, "0:", 1) != FR_OK) {
+		//Default_Handler();
+	}
+
+    LCD_BMP_DrawBitmap("sw.bmp", 0, 0);
 
     vTaskStartScheduler();
 

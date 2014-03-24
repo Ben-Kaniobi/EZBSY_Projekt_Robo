@@ -1,5 +1,5 @@
 /**
- * \file    ECTS_updater.h
+ * \file    ECTS_updater_task.h
  * \author  kasen1
  * \date    2014-03-12
  *
