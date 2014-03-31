@@ -29,7 +29,8 @@
 
 /* private macro --------------------------------------------------------------*/
 /* Common */
-#define EVER        ;;                   /* For forever loop: for(;;)          */
+#define EVER         ;;                  /* For forever loop: for(;;)          */
+#define X_STEP       (1)                 /* TODO                               */
 /* CAN IDs */
 #define GET_STATUS_L (0x110)             /* Status request for left conveyer   */
 #define GET_STATUS_C (0x120)             /* Status request for center conveyer */
@@ -47,33 +48,45 @@
 #define RESET_C      (0x12F)             /* Reset for center conveyer          */
 #define RESET_R      (0x13F)             /* Reset for right conveyer           */
 /* CAN messages */
-#define ERROR        (0x00)
-#define STATUS       (0x01)
-#define START        (0x01)
-#define STOP         (0x02)
-#define STOP_AT      (0x03)
-#define DONE         (0x04)
-
-
+#define MSG_ERROR    (0x00)
+#define MSG_STATUS   (0x01)
+#define MSG_START    (0x01)
+#define MSG_STOP     (0x02)
+#define MSG_STOP_AT  (0x03)
+#define MSG_DONE     (0x04)
+/* CAN DB values */
+#define DB_STATUS    (1)
+#define DB_ECTS      (2)
+#define DB_POS_X_h   (3) //TODO: High or low byte?
+#define DB_POS_X_l   (4) //TODO: High or low byte?
+#define DB_POS_Y_h   (5) //TODO: High or low byte?
+#define DB_POS_Y_l   (6) //TODO: High or low byte?
 
 /* data types -----------------------------------------------------------------*/
 xTaskHandle xECTS_updater_task_handle = NULL;
 
 /* function prototypes --------------------------------------------------------*/
 static void  vECTS_updater_task(void *pvData);
+void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[]);
 
 /* data -----------------------------------------------------------------------*/
+ects ECTS_1 = {0, 0, conveyor_C};
+ects ECTS_2 = {0, 0, conveyor_C};
+ects ECTS_3 = {0, 0, conveyor_C};
+conveyorState conveyor_L_state = STOPPED;
+conveyorState conveyor_C_state = STOPPED;
+conveyorState conveyor_R_state = STOPPED;
 
 /* implementation -------------------------------------------------------------*/
 
 /*******************************************************************************
- *  function :    main
+ *  function :    init_ECTS_updater_tasks
  ******************************************************************************/
-/** \brief        Initialize GUI, BSP and OS
+/** \brief        Initialisation for task
  *
  *  \type         global
  *
- *  \return       error code
+ *  \return
  *
  ******************************************************************************/
 void  init_ECTS_updater_tasks(void) {
@@ -82,12 +95,11 @@ void  init_ECTS_updater_tasks(void) {
 }
 
 /*******************************************************************************
- *  function :    AppTask1
+ *  function :    vECTS_updater_task
  ******************************************************************************/
-/** \brief        Increments a counter each cycle and displays it's value
- *                on the display
+/** \brief        Updates values of the ECTS'
  *
- *  \type         local
+ *  \type         global
  *
  *  \param[in]	  pvData    not used
  *
@@ -100,9 +112,11 @@ static void vECTS_updater_task(void *pvData) {
     portTickType xLastFlashTime;
 	xLastFlashTime = xTaskGetTickCount();
 
-	uint8_t CAN_msg;
-
 	for(EVER) {
+
+		ECTS_1.x += X_STEP;
+		ECTS_2.x += X_STEP;
+		ECTS_3.x += X_STEP;
 
 		//TODO: CAN_Status_Abfrage()
 
@@ -110,6 +124,61 @@ static void vECTS_updater_task(void *pvData) {
 
 
 		/* Delay until defined time passed */
-		vTaskDelayUntil( &xLastFlashTime, 200 / portTICK_RATE_MS);
+		vTaskDelayUntil(&xLastFlashTime, 200 / portTICK_RATE_MS);
 	}
+}
+
+/*******************************************************************************
+ *  function :    CAN_conveyor_status_response
+ ******************************************************************************/
+/** \brief        Function which is called by CAN gatekeeper when a conveyor
+ *                status response was received.
+ *
+ *  \type         global
+ *
+ *  \param[in]	  conveyor    Number to identify from which conveyor the message
+ *                            was. Use CONVEYOR_L, CONVEYOR_C, or CONVEYOR_M
+ *
+ *  \return       void
+ *
+ ******************************************************************************/
+void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[])
+{
+	if(DB[1] == MSG_STATUS) {
+		/* ERROR */
+		return;
+	}
+
+	/* Update conveyor state */
+	switch(conveyor) {
+	case CONVEYOR_L:
+		conveyor_L_state = DB[DB_STATUS];
+		break;
+
+	case CONVEYOR_C:
+		conveyor_C_state = DB[DB_STATUS];
+		break;
+
+	case CONVEYOR_R:
+		conveyor_R_state = DB[DB_STATUS];
+		break;
+
+	default:
+		/* Something went terribly wrong... */
+		//TODO: Handle?
+		return;
+		break;
+	}
+
+//	ects *ECTS_p;
+
+	/* Find correct ECTS */
+//TODO
+//	if(ECTS_1.z == conveyor) {
+//		ECTS_p = &ECTS_1;
+//	}
+
+	/* Finally set the position for the correct ECTS */
+//	*ECTS_p->x = (DB[DB_POS_X_h]<<8 & 0xFF00) | DB[DB_POS_X_l];
+//	*ECTS_p->y = (DB[DB_POS_Y_h]<<8 & 0xFF00) | DB[DB_POS_Y_l];
 }
