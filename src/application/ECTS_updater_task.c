@@ -170,15 +170,59 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[])
 		break;
 	}
 
-//	ects *ECTS_p;
+	ects *ECTS_p = NULL;
 
-	/* Find correct ECTS */
-//TODO
-//	if(ECTS_1.z == conveyor) {
-//		ECTS_p = &ECTS_1;
-//	}
+	/* Find correct ECTS_p */
+	if(ECTS_1.z == conveyor) {
 
-	/* Finally set the position for the correct ECTS */
-//	*ECTS_p->x = (DB[DB_POS_X_h]<<8 & 0xFF00) | DB[DB_POS_X_l];
-//	*ECTS_p->y = (DB[DB_POS_Y_h]<<8 & 0xFF00) | DB[DB_POS_Y_l];
+		/* Use ECTS_1 */
+		ECTS_p = &ECTS_1;
+	}
+	if(ECTS_2.z == conveyor) {
+
+		if(!ECTS_p) {
+
+			/* ECTS_p hasn't been set before, set it now */
+			ECTS_p = &ECTS_1;
+		}
+		else {
+
+			/* ECTS_p has been set before, compare x values */
+			if(ECTS_2.x > ECTS_p->x) {
+
+				//TODO: Handle 2>p aber 2 schon hinter Schranke
+
+				/* ECTS_2 is further, use this */
+				ECTS_p = &ECTS_2;
+			}
+		}
+	}
+	if(ECTS_3.z == conveyor) {
+
+		if(!ECTS_p) {
+
+			/* ECTS_p hasn't been set before, set it now */
+			ECTS_p = &ECTS_1;
+		}
+		else {
+
+			/* ECTS_p has been set before, compare x values */
+			if(ECTS_3.x > ECTS_p->x) {
+
+				/* ECTS_2 is further, use this */
+				ECTS_p = &ECTS_3;
+			}
+		}
+	}
+	if(ECTS_p) {
+
+		/* Finally set the position for the correct ECTS */
+		ECTS_p->x = (DB[DB_POS_X_h]<<8 & 0xFF00) | DB[DB_POS_X_l];
+		ECTS_p->y = (DB[DB_POS_Y_h]<<8 & 0xFF00) | DB[DB_POS_Y_l];
+	}
+	else {
+
+		/* ECTS_p hasn't been set before --> no ECTS was on the conveyor but was now detected*/
+		//TODO: Handle
+	}
 }
