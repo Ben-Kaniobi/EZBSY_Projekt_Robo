@@ -19,18 +19,18 @@
 #include <stdint.h>                      /* Integer typedefs                   */
 
 /* exported typedef -----------------------------------------------------------*/
+/* ECTS */
 typedef struct {
 	uint16_t x;
 	uint8_t y;
-	enum {Laufband1, Laufband2, Laufband3,
-		Robo1, Ablage11, Ablage12, Ablage13,
-		Robo2, Ablage21, Ablage22, Ablage23} z;
-	enum {Schwarz, Grau} Farbe;
-} ECTS;
+	enum {conveyorL, conveyorC, conveyorR, roboL, roboR} z;
+} ects;
+/* Conveyor */
+typedef enum {STOPPED, RUNNING} conveyorState;
 
 /* exported define ------------------------------------------------------------*/
 /* Rangefinder-task RTOS configuration */
-#define ECTS_UPDATER_TASK_NAME       "Fliessband-ECTS"
+#define ECTS_UPDATER_TASK_NAME       "ECTS-updater task"
 #define ECTS_UPDATER_STACK_SIZE      configMINIMAL_STACK_SIZE /* size of the receive and transmit task */
 #define ECTS_UPDATER_TASK_PRIORITY   (configMAX_PRIORITIES - 4UL) /* priority 4*/
 

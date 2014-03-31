@@ -57,7 +57,7 @@
 
 
 /* data types -----------------------------------------------------------------*/
-xTaskHandle xECTS_updater_handle = NULL;
+xTaskHandle xECTS_updater_task_handle = NULL;
 
 /* function prototypes --------------------------------------------------------*/
 static void  vECTS_updater_task(void *pvData);
@@ -78,7 +78,7 @@ static void  vECTS_updater_task(void *pvData);
  ******************************************************************************/
 void  init_ECTS_updater_tasks(void) {
 
-	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, &xECTS_updater_handle);
+	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, &xECTS_updater_task_handle);
 }
 
 /*******************************************************************************
