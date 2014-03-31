@@ -35,6 +35,10 @@
 #define LCD_STACK_SIZE		configMINIMAL_STACK_SIZE 		/*!< size of the task's stack */
 #define LCD_TASK_PRIORITY	(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
 
+#define LCD_COLOR_DARK_GREEN			0x03E0
+#define LCD_COLOR_LINE_GREEN			0x05E0
+#define LCD_COLOR_BACK_WHITE			0xEF7D
+
 
 /* ------------------------- module type declaration -------------------------*/
 
