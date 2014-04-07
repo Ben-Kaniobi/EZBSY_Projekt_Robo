@@ -87,9 +87,9 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message);
 void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]);
 
 /* data ----------------------------------------------------------------------*/
-ects ECTS_1 = {0, 0, conveyor_C};
-ects ECTS_2 = {0, 0, conveyor_C};
-ects ECTS_3 = {0, 0, conveyor_C};
+ects ECTS_1 = {0, 0, 0, conveyor_C};
+ects ECTS_2 = {1, 0, 0, conveyor_C};
+ects ECTS_3 = {2, 0, 0, conveyor_C};
 conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;

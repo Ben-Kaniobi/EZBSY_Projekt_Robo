@@ -29,6 +29,7 @@
 /* exported typedef -----------------------------------------------------------*/
 /* ECTS */
 typedef struct {
+	uint8_t id;
 	uint16_t x;
 	uint8_t y;
 	enum {conveyor_L = 1, conveyor_C, conveyor_R, robo_L, robo_R} z;
