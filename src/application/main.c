@@ -73,11 +73,11 @@ int  main(void) {
 	InitLCDTask();
 	InitUARTTask();
 	InitCANGatekeeperTask();
-	InitRobotTasks();
+	//InitRobotTasks();
 
 	/*Example for CAN usage*/
 	setFunctionCANListener((CAN_function_listener_t)CANTest, 0x143);
-	createCANMessage(0x142, 3, data);
+//	createCANMessage(0x142, 3, data);
 
     vTaskStartScheduler();
 
