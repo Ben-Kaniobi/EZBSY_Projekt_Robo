@@ -78,7 +78,6 @@
 #define DB_POS_Y_l   (6)
 
 /* data types ----------------------------------------------------------------*/
-xTaskHandle xECTS_updater_task_handle = NULL;
 
 /* function prototypes -------------------------------------------------------*/
 static void  vECTS_updater_task(void *pvData);
@@ -115,8 +114,11 @@ void  init_ECTS_updater_task(void) {
 	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorR_status_response, STATUS_R);
 	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorC_status_response, STATUS_C);
 
-	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, &xECTS_updater_task_handle);
+	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, NULL);
 }
+/* ****************************************************************************/
+/* End      :  init_ECTS_updater_tasks										  */
+/* ****************************************************************************/
 
 /*******************************************************************************
  *  function :    vECTS_updater_task
@@ -151,6 +153,9 @@ static void vECTS_updater_task(void *pvData) {
 		vTaskDelayUntil(&xLastFlashTime, TIME_STEP / portTICK_RATE_MS);
 	}
 }
+/* ****************************************************************************/
+/* End      :  init_ECTS_updater_tasks										  */
+/* ****************************************************************************/
 
 /******************************************************************************/
 /* Function:  CAN_conveyorL_status_response                                   */
@@ -178,6 +183,9 @@ void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message) {
 	}
 	/* Else: Error message received */
 }
+/* ****************************************************************************/
+/* End      :  CAN_conveyorL_status_response								  */
+/* ****************************************************************************/
 
 /******************************************************************************/
 /* Function:  CAN_conveyorR_status_response                                   */
@@ -205,6 +213,9 @@ void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message) {
 	}
 	/* Else: Error message received */
 }
+/* ****************************************************************************/
+/* End      :  CAN_conveyorR_status_response								  */
+/* ****************************************************************************/
 
 /******************************************************************************/
 /* Function:  CAN_conveyorC_status_response                                   */
@@ -232,6 +243,9 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message) {
 	}
 	/* Else: Error message received */
 }
+/* ****************************************************************************/
+/* End      :  CAN_conveyorC_status_response								  */
+/* ****************************************************************************/
 
 /******************************************************************************/
 /* Function:  CAN_conveyor_status_response                                   */
@@ -310,3 +324,6 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]) {
 		//TODO: Handle
 	}
 }
+/* ****************************************************************************/
+/* End      :  CAN_conveyor_status_response									  */
+/* ****************************************************************************/
