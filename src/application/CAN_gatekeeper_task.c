@@ -1,11 +1,9 @@
 /******************************************************************************/
 /*! \file CAN_gatekeeper_task.c
 ******************************************************************************
-* \brief Short description of the files function
+* \brief Manages the CAN communication
 *
-* Function : Manages the CAN communication
-*
-* Procedures : 	vCANGatekeeperTask(void*)
+* Procedures : 	createCANMessage(uint16_, uint8_t, uint8_t)
 * 				InitCANGatekeeperTask()
 *
 * \author heimg1

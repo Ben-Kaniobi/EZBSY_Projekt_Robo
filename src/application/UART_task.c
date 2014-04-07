@@ -28,6 +28,7 @@
 #include "stm32f4xx.h"			/* uC includes */
 #include "uart.h"				/*UART imports*/
 #include <stdio.h>              /* Standard Input/Output*/
+#include <string.h>
 
 /* application */
 #include "UART_task.h"		/* Own header include */
@@ -118,7 +119,7 @@ static void uart_init(void) {
 *
 * \param[in]   string array of length UART_MSG_LENGTH
 *
-* \return None
+* \return -1 if the message is to long, 1 if the message was sent
 *
 * \author heimg1
 *
@@ -129,10 +130,18 @@ static void uart_init(void) {
 * \bug Description of the bug
 *
 *******************************************************************************/
-void createUARTMessage(char data[UART_MSG_LENGTH])
+uint8_t createUARTMessage(char data[])
 {
+	if(strlen(data) <= UART_MSG_LENGTH){
 
-    xQueueSendToBack(qUARTTx, data,0);
+		xQueueSendToBack(qUARTTx, data,0);
+		return 1;
+	}
+	else{
+
+		return -1;
+	}
+
 }
 /* ****************************************************************************/
 /* End      :  createUARTMessage											  */
@@ -174,7 +183,7 @@ static void vUARTTx(void* pvParameters )
             /* transmit the message */
         	printf("%s\n", &tx_Message);
 
-            vTaskDelayUntil( &tx_wait_time, 10 / portTICK_RATE_MS); /* wait for 10ms */
+            vTaskDelayUntil( &tx_wait_time, 100 / portTICK_RATE_MS); /* wait for 100ms */
         }
     }
 }
