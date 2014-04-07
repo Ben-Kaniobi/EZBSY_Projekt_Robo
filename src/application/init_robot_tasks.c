@@ -90,11 +90,11 @@ void InitRobotTasks()
 	xSemaphoreRightConveyor = xSemaphoreCreateBinary();
 	xSemaphoreEctsTray = xSemaphoreCreateBinary();
 
-    /* create the task */
+    /* Create a task for the left robot arm */
     xTaskCreate(vRobotLeftTask, (signed char *)ROBOT_LEFT_TASK_NAME, ROBOT_LEFT_STACK_SIZE, NULL, ROBOT_LEFT_TASK_PRIORITY, NULL);
 
-    /* create the task */
-    xTaskCreate(vRobotRightTask, (signed char *)ROBOT_RIGHT_TASK_NAME, ROBOT_RIGHT_STACK_SIZE, NULL, ROBOT_RIGHT_TASK_PRIORITY, NULL);
+    /* Create a task for the right robot arm */
+//    xTaskCreate(vRobotRightTask, (signed char *)ROBOT_RIGHT_TASK_NAME, ROBOT_RIGHT_STACK_SIZE, NULL, ROBOT_RIGHT_TASK_PRIORITY, NULL);
 
 }
 

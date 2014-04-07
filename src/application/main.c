@@ -30,6 +30,7 @@
 #include "lcd_task.h"
 #include "CAN_gatekeeper_task.h"
 #include "UART_task.h"
+#include "init_robot_tasks.h"
 
 #include  "inc/lcd.h"                          /* Graphic Library                */
 #include <ff.h>
@@ -72,6 +73,7 @@ int  main(void) {
 	InitLCDTask();
 	InitUARTTask();
 	InitCANGatekeeperTask();
+	InitRobotTasks();
 
 	/*Example for CAN usage*/
 	setFunctionCANListener((CAN_function_listener_t)CANTest, 0x143);
