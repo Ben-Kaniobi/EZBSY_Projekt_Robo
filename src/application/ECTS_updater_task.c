@@ -96,6 +96,7 @@ conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;
 uint8_t CAN_buffer[8];
+xSemaphoreHandle xMutexEditECTS = NULL;
 
 /* implementation ------------------------------------------------------------*/
 
@@ -115,6 +116,9 @@ void  init_ECTS_updater_task(void) {
 	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorL_status_response, STATUS_L);
 	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorR_status_response, STATUS_R);
 	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorC_status_response, STATUS_C);
+
+	/* Create the mutex for ECTS access */
+	xMutexEditECTS = xSemaphoreCreateMutex();
 
 	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, NULL);
 }
@@ -337,8 +341,13 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]) {
 		uint16_t raw_pos_x = (data[DB_POS_X_h]<<8 & 0xFF00) | (data[DB_POS_X_l] & 0xFF);
 		/* Convert to our format */
 		//raw_pos_x = TODO raw_pos_x;
-		/* Finally set the position for the correct ECTS */
-		ECTS_p->x = raw_pos_x;
+		/* Get mutex for ECTS access */
+	    if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
+			/* Finally set the position for the correct ECTS */
+			ECTS_p->x = raw_pos_x;
+			/* Release semaphore */
+	        xSemaphoreGive(xMutexEditECTS);
+	    }
 
 		/* If theres data for the y position available, update this too */
 		if(data[DB_ECTS_INFO] == 3) {
@@ -348,7 +357,13 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]) {
 			/* Convert to our format */
 			//raw_pos_y = TODO raw_pos_y;
 			/* Finally set the position for the correct ECTS */
-			ECTS_p->y = raw_pos_y;
+			/* Get mutex for ECTS access */
+		    if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
+				/* Finally set the position for the correct ECTS */
+				ECTS_p->y = raw_pos_y;
+				/* Release semaphore */
+		        xSemaphoreGive(xMutexEditECTS);
+		    }
 		}
 	}
 	else {
@@ -359,4 +374,29 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]) {
 }
 /* ****************************************************************************/
 /* End      :  CAN_conveyor_status_response									  */
+/* ****************************************************************************/
+
+/******************************************************************************/
+/* Function:  update_ECTS_z                                                   */
+/******************************************************************************/
+/*! \brief Finds the correct ECTS and updates the positions for an ECTS that
+*          changes to a new z position (e.g. conveyor to robo)
+*
+* \param[in] new_z The new position for the ECTS
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.0.1
+*
+* \date 12.03.2014 Created
+*
+*******************************************************************************/
+void update_ECTS_z(z_pos new_z) {
+
+	//TODO
+}
+/* ****************************************************************************/
+/* End      :  update_ECTS_z									  */
 /* ****************************************************************************/

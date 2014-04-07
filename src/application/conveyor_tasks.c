@@ -155,6 +155,9 @@ static void vConveyorL_task(void* pvParameters )
 
     		/* Conveyor stopped, give ECTS semaphore */
     	    xSemaphoreGive(xSemaphoreLeftECTS);
+
+    	    /* Update the ECTS */
+    	    update_ECTS_z(robo_L);
         }
 
         vTaskDelayUntil(&xLastFlashTime, 200 / portTICK_RATE_MS);
@@ -212,6 +215,9 @@ static void vConveyorR_task(void* pvParameters )
 
 			/* Conveyor stopped, give ECTS semaphore */
 			xSemaphoreGive(xSemaphoreRightECTS);
+
+    	    /* Update the ECTS */
+    	    update_ECTS_z(robo_R);
 		}
 
 		vTaskDelayUntil(&xLastFlashTime, 200 / portTICK_RATE_MS);
