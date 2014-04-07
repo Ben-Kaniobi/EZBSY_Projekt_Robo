@@ -5,7 +5,10 @@
 *
 * Procedures : 	vECTS_updater_task(void*)
 * 				init_ECTS_updater_tasks()
-*              	CAN_conveyor_status_response()
+*               CAN_conveyorL_status_response(CARME_CAN_MESSAGE*)
+*               CAN_conveyorR_status_response(CARME_CAN_MESSAGE*)
+*               CAN_conveyorC_status_response(CARME_CAN_MESSAGE*)
+*               CAN_conveyor_status_response(uint8_t, uint8_t)
 *
 * \author kasen1
 *
@@ -105,7 +108,7 @@ char CAN_buffer[8];
  *  \return
  *
  ******************************************************************************/
-void  init_ECTS_updater_tasks(void) {
+void  init_ECTS_updater_task(void) {
 
 	/* Set a CAN listener functions for conveyor status response */
 	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorL_status_response, STATUS_L);

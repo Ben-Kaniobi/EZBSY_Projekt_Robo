@@ -3,9 +3,7 @@
 ******************************************************************************
 * \brief Task to update the position of the ECTS structs
 *
-* Procedures : 	vECTS_updater_task(void*)
-* 				init_ECTS_updater_tasks()
-*              	CAN_conveyor_status_response()
+* Procedures : 	init_ECTS_updater_task()
 *
 * \author kasen1
 *
@@ -59,7 +57,7 @@ conveyorState conveyor_C_state;
 conveyorState conveyor_R_state;
 
 /* exported function prototypes -----------------------------------------------*/
-extern void init_ECTS_updater_tasks(void);
+extern void init_ECTS_updater_task(void);
 
 #endif /* __APP_ECTS_UPDATER_TASK_H_ */
 

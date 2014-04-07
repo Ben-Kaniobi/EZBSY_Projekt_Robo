@@ -66,7 +66,7 @@ int  main(void) {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
     /* module initialisation */
-	init_ECTS_updater_tasks();
+	init_ECTS_updater_task();
 	InitLCDTask();
 	InitCANGatekeeperTask();
 
