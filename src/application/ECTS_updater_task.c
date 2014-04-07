@@ -77,7 +77,9 @@
 #define DB_POS_Y_h   (5)
 #define DB_POS_Y_l   (6)
 /* Position */
-#define X_STEP_MAX   (47)                /* Max. position in cm for x direction */ //TODO
+#define X_STEP_MAX   (47)                /* Max. position in cm for x direction */
+#define X_SENS_LR    (9)                 /* Position in cm for the left/right sensor */
+#define X_SENS_C     (22)                /* Position in cm for the center sensor */
 
 /* data types ----------------------------------------------------------------*/
 
@@ -86,7 +88,7 @@ static void  vECTS_updater_task(void *pvData);
 void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message);
 void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message);
 void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message);
-void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]);
+void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]);
 
 /* data ----------------------------------------------------------------------*/
 ects ECTS_1 = {0, 0, 0, conveyor_L};
@@ -266,11 +268,13 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message) {
 /* ****************************************************************************/
 
 /******************************************************************************/
-/* Function:  CAN_conveyor_status_response                                   */
+/* Function:  CAN_conveyor_status_handler                                   */
 /******************************************************************************/
 /*! \brief Function to handle conveyor status responses
 *
-* \param[in] *rx_message The received CAN message
+* \param[in] conveyor The conveyor for which the message was received
+*
+* \param[in] data[] The status data (8 bit max.)
 *
 * \return None
 *
@@ -281,10 +285,27 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message) {
 * \date 12.03.2014 Created
 *
 *******************************************************************************/
-void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]) {
+void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 
 	/* Update conveyor state */
-	conveyor_L_state = data[DB_STATUS];
+	switch(conveyor) {
+
+	case conveyor_L:
+		conveyor_L_state = data[DB_STATUS];
+		break;
+
+	case conveyor_C:
+		conveyor_C_state = data[DB_STATUS];
+		break;
+
+	case conveyor_R:
+		conveyor_R_state = data[DB_STATUS];
+		break;
+
+	default:
+		/* Invalid input, don't continue */
+		return;
+	}
 
 	/* Only continue if there is at least information about the x position available */
 	if(data[DB_ECTS_INFO] < 2) {

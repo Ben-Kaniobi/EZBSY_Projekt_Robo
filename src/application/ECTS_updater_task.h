@@ -53,7 +53,6 @@ extern ects ECTS_3;
 extern conveyorState conveyor_L_state;
 extern conveyorState conveyor_C_state;
 extern conveyorState conveyor_R_state;
-//extern xSemaphoreHandle xMutexEditECTS;
 
 /* exported function prototypes -----------------------------------------------*/
 extern void init_ECTS_updater_task(void);

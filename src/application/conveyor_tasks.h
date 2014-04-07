@@ -33,7 +33,7 @@
 
 /* RTOS configuration */
 #define CONVEYOR_L_TASK_NAME		"Conveyor left task"
-#define CONVEYOR_R_TASK_NAME		"Conveyor left task"
+#define CONVEYOR_R_TASK_NAME		"Conveyor right task"
 #define CONVEYOR_TASK_STACK_SIZE	configMINIMAL_STACK_SIZE 		/*!< size of the task's stack */
 #define CONVEYOR_TASK_PRIORITY		(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
 
