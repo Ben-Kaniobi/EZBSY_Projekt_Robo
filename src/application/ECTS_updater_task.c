@@ -71,11 +71,13 @@
 #define MSG_DONE     (0x04)
 /* CAN DB values */
 #define DB_STATUS    (1)
-#define DB_ECTS      (2)
+#define DB_ECTS_INFO (2)
 #define DB_POS_X_h   (3)
 #define DB_POS_X_l   (4)
 #define DB_POS_Y_h   (5)
 #define DB_POS_Y_l   (6)
+/* Position */
+#define X_STEP_MAX   (47)                /* Max. position in cm for x direction */ //TODO
 
 /* data types ----------------------------------------------------------------*/
 
@@ -87,9 +89,9 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message);
 void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]);
 
 /* data ----------------------------------------------------------------------*/
-ects ECTS_1 = {0, 0, conveyor_C};
-ects ECTS_2 = {0, 0, conveyor_C};
-ects ECTS_3 = {0, 0, conveyor_C};
+ects ECTS_1 = {0, 0, 0, conveyor_L};
+ects ECTS_2 = {1, 0, 0, conveyor_C};
+ects ECTS_3 = {2, 0, 0, conveyor_R};
 conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;
@@ -140,6 +142,18 @@ static void vECTS_updater_task(void *pvData) {
 
 	for(EVER) {
 
+		if(ECTS_1.x >= X_STEP_MAX) {
+			
+			ECTS_1.x = 0;
+		}
+		if(ECTS_2.x >= X_STEP_MAX) {
+			
+			ECTS_2.x = 0;
+		}
+		if(ECTS_3.x >= X_STEP_MAX) {
+			
+			ECTS_3.x = 0;
+		}
 		ECTS_1.x += X_STEP;
 		ECTS_2.x += X_STEP;
 		ECTS_3.x += X_STEP;
@@ -268,6 +282,11 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]) {
 	/* Update conveyor state */
 	conveyor_L_state = data[DB_STATUS];
 
+	/* Only continue if there is at least information about the x position available */
+	if(data[DB_ECTS_INFO] < 2) {
+		return;
+	}
+
 	ects *ECTS_p = NULL;
 
 	/* Find correct ECTS_p */
@@ -314,9 +333,23 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]) {
 	}
 	if(ECTS_p) {
 
+		/* Concat the two bytes */
+		uint16_t raw_pos_x = (data[DB_POS_X_h]<<8 & 0xFF00) | (data[DB_POS_X_l] & 0xFF);
+		/* Convert to our format */
+		//raw_pos_x = TODO raw_pos_x;
 		/* Finally set the position for the correct ECTS */
-		ECTS_p->x = (data[DB_POS_X_h]<<8 & 0xFF00) | data[DB_POS_X_l];
-		ECTS_p->y = (data[DB_POS_Y_h]<<8 & 0xFF00) | data[DB_POS_Y_l];
+		ECTS_p->x = raw_pos_x;
+
+		/* If theres data for the y position available, update this too */
+		if(data[DB_ECTS_INFO] == 3) {
+
+			/* Concat the two bytes */
+			uint16_t raw_pos_y = (data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
+			/* Convert to our format */
+			//raw_pos_y = TODO raw_pos_y;
+			/* Finally set the position for the correct ECTS */
+			ECTS_p->y = raw_pos_y;
+		}
 	}
 	else {
 

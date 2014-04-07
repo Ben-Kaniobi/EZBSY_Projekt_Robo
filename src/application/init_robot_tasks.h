@@ -40,8 +40,23 @@
 #define ROBOT_RIGHT_STACK_SIZE		configMINIMAL_STACK_SIZE 		/*!< size of the task's stack */
 #define ROBOT_RIGHT_TASK_PRIORITY	(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
 
-/* ------------------------- module type declaration -------------------------*/
+/* Can IDs of both robot arms (only one ID per arm, as we send nothing but instructions) */
+#define CAN_ID_LEFT_ROBOT			( 0x152 )
+#define CAN_ID_RIGHT_ROBOT			( 0x162 )
 
+#define CAN_INSTRUCTION_DLC			( 6 )
+
+/* ------------------------- module type declaration -------------------------*/
+enum robotPosition
+{
+	PrepareToTakeEcts,
+	LiftEctsUp,
+	RotateToUnloadTray,
+	PrepareToUnloadEcts,
+	UnloadEctsToTray,
+	RemoveArmFromUnloadTray,
+	RotateToConveyor
+};
 
 /* ------------------------- module data declaration -------------------------*/
 extern xSemaphoreHandle xSemaphoreLeftConveyor;				/* Left conveyor is free */
