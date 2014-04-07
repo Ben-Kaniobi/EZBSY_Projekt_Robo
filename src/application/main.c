@@ -29,6 +29,7 @@
 #include "ECTS_updater_task.h"
 #include "lcd_task.h"
 #include "CAN_gatekeeper_task.h"
+#include "UART_task.h"
 
 #include  "inc/lcd.h"                          /* Graphic Library                */
 #include <ff.h>
@@ -50,6 +51,7 @@ void CANTest(CARME_CAN_MESSAGE *rx_message){
 	LCD_DisplayStringCenter(6, "Flipper");
 }
 
+
 /*******************************************************************************
  *  function :    main
  ******************************************************************************/
@@ -68,6 +70,7 @@ int  main(void) {
     /* module initialisation */
 	init_ECTS_updater_tasks();
 	InitLCDTask();
+	InitUARTTask();
 	InitCANGatekeeperTask();
 
 	/*Example for CAN usage*/

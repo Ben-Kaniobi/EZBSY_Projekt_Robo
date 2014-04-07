@@ -76,6 +76,7 @@ extern "C" {
 
 /*----- Header-Files -------------------------------------------------------*/
 #include <stm32f4xx.h>				/* Processor STM32F407IG				*/
+#include <carme.h>					/* CARME Module							*/
 
 /*----- Macros -------------------------------------------------------------*/
 #define CARME_UART0		USART1		/**< CARME UART Port 0					*/
