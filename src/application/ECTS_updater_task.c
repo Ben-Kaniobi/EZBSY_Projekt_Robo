@@ -199,7 +199,7 @@ void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message) {
 	if(rx_message->data[0] == MSG_STATUS) {
 
 		/* Redirect to combined function */
-		CAN_conveyor_status_response(conveyor_L, rx_message->data);
+		CAN_conveyor_status_handler(conveyor_L, rx_message->data);
 	}
 	/* Else: Error message received */
 }
@@ -229,7 +229,7 @@ void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message) {
 	if(rx_message->data[0] == MSG_STATUS) {
 
 		/* Redirect to combined function */
-		CAN_conveyor_status_response(conveyor_R, rx_message->data);
+		CAN_conveyor_status_handler(conveyor_R, rx_message->data);
 	}
 	/* Else: Error message received */
 }
@@ -259,7 +259,7 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message) {
 	if(rx_message->data[0] == MSG_STATUS) {
 
 		/* Redirect to combined function */
-		CAN_conveyor_status_response(conveyor_C, rx_message->data);
+		CAN_conveyor_status_handler(conveyor_C, rx_message->data);
 	}
 	/* Else: Error message received */
 }
