@@ -76,6 +76,8 @@
 #define DB_POS_X_l   (4)
 #define DB_POS_Y_h   (5)
 #define DB_POS_Y_l   (6)
+/* Position */
+#define X_STEP_MAX   (47)                /* Max. position in cm for x direction */ //TODO
 
 /* data types ----------------------------------------------------------------*/
 
@@ -87,9 +89,9 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message);
 void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]);
 
 /* data ----------------------------------------------------------------------*/
-ects ECTS_1 = {0, 0, 0, conveyor_C};
+ects ECTS_1 = {0, 0, 0, conveyor_L};
 ects ECTS_2 = {1, 0, 0, conveyor_C};
-ects ECTS_3 = {2, 0, 0, conveyor_C};
+ects ECTS_3 = {2, 0, 0, conveyor_R};
 conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;
@@ -140,6 +142,18 @@ static void vECTS_updater_task(void *pvData) {
 
 	for(EVER) {
 
+		if(ECTS_1.x >= X_STEP_MAX) {
+			
+			ECTS_1.x = 0;
+		}
+		if(ECTS_2.x >= X_STEP_MAX) {
+			
+			ECTS_2.x = 0;
+		}
+		if(ECTS_3.x >= X_STEP_MAX) {
+			
+			ECTS_3.x = 0;
+		}
 		ECTS_1.x += X_STEP;
 		ECTS_2.x += X_STEP;
 		ECTS_3.x += X_STEP;
