@@ -1,26 +1,40 @@
-/**
- * \file    ECTS_updater.h
- * \author  kasen1
- * \date    2014-03-12
- *
- * \version 1.0
- *  import from template by wht4 (2014-03-12)
- *
- * \brief   tasks to handle the conveyer and ECTS updater
- *
- * @{
- */
+/******************************************************************************/
+/*! \file ECTS_updater.h
+******************************************************************************
+* \brief Task to update the position of the ECTS structs
+*
+* Procedures : 	vECTS_updater_task(void*)
+* 				init_ECTS_updater_tasks()
+*               CAN_conveyorL_status_response(CARME_CAN_MESSAGE*)
+*               CAN_conveyorR_status_response(CARME_CAN_MESSAGE*)
+*               CAN_conveyorC_status_response(CARME_CAN_MESSAGE*)
+*               CAN_conveyor_status_response(uint8_t, uint8_t)
+*
+* \author kasen1
+*
+* \version 0.0.1
+*
+* \history 12.03.2014 Import from template by wht4
+*
+*
+* \ingroup application
+*
+*/
+/* ****************************************************************************/
+/* Robo model                                                                 */
+/* ****************************************************************************/
 
-/* Includes -------------------------------------------------------------------*/
+/* Includes ------------------------------------------------------------------*/
 #include "ECTS_updater_task.h"
-#include "carme_io1.h"                   /* CARMEIO1 Board Support Package     */
+#include "carme_io1.h"                  /* CARMEIO1 Board Support Package     */
+#include "CAN_gatekeeper_task.h"        /* CAN communication                  */
 
-#include <stdio.h>                       /* Standard Input/Output              */
-#include <stdlib.h>                      /* General Utilities                  */
-#include <string.h>                      /* String handling                    */
-#include <stdint.h>                      /* Integer typedefs                   */
+#include <stdio.h>                      /* Standard Input/Output              */
+#include <stdlib.h>                     /* General Utilities                  */
+#include <string.h>                     /* String handling                    */
+#include <stdint.h>                     /* Integer typedefs                   */
 
-#include <FreeRTOS.h>                    /* All freeRTOS headers               */
+#include <FreeRTOS.h>                   /* All freeRTOS headers               */
 #include <task.h>
 #include <queue.h>
 #include <semphr.h>
@@ -29,24 +43,25 @@
 
 /* private macro --------------------------------------------------------------*/
 /* Common */
-#define EVER         ;;                  /* For forever loop: for(;;)          */
-#define X_STEP       (1)                 /* TODO                               */
+#define EVER         ;;                 /* For forever loop: for(;;)          */
+#define X_STEP       (1)                /* TODO                               */
+#define TIME_STEP    (200)              /* Time delay in ms for updater task  */
 /* CAN IDs */
-#define GET_STATUS_L (0x110)             /* Status request for left conveyer   */
-#define GET_STATUS_C (0x120)             /* Status request for center conveyer */
-#define GET_STATUS_R (0x130)             /* Status request for right conveyer  */
-#define STATUS_L     (0x111)             /* Status response for left conveyer  */
-#define STATUS_C     (0x121)             /* Status response for center conveyer*/
-#define STATUS_R     (0x131)             /* Status response for right conveyer */
-#define CMD_L        (0x112)             /* Command for left conveyer          */
-#define CMD_C        (0x122)             /* Command for center conveyer        */
-#define CMD_R        (0x132)             /* Command for right conveyer         */
-#define CMD_STATUS_L (0x113)             /* Command status for left conveyer   */
-#define CMD_STATUS_C (0x123)             /* Command status for center conveyer */
-#define CMD_STATUS_R (0x133)             /* Command status for right conveyer  */
-#define RESET_L      (0x11F)             /* Reset for left conveyer            */
-#define RESET_C      (0x12F)             /* Reset for center conveyer          */
-#define RESET_R      (0x13F)             /* Reset for right conveyer           */
+#define GET_STATUS_L (0x110)            /* Status request for left conveyer   */
+#define GET_STATUS_C (0x120)            /* Status request for center conveyer */
+#define GET_STATUS_R (0x130)            /* Status request for right conveyer  */
+#define STATUS_L     (0x111)            /* Status response for left conveyer  */
+#define STATUS_C     (0x121)            /* Status response for center conveyer*/
+#define STATUS_R     (0x131)            /* Status response for right conveyer */
+#define CMD_L        (0x112)            /* Command for left conveyer          */
+#define CMD_C        (0x122)            /* Command for center conveyer        */
+#define CMD_R        (0x132)            /* Command for right conveyer         */
+#define CMD_STATUS_L (0x113)            /* Command status for left conveyer   */
+#define CMD_STATUS_C (0x123)            /* Command status for center conveyer */
+#define CMD_STATUS_R (0x133)            /* Command status for right conveyer  */
+#define RESET_L      (0x11F)            /* Reset for left conveyer            */
+#define RESET_C      (0x12F)            /* Reset for center conveyer          */
+#define RESET_R      (0x13F)            /* Reset for right conveyer           */
 /* CAN messages */
 #define MSG_ERROR    (0x00)
 #define MSG_STATUS   (0x01)
@@ -57,27 +72,30 @@
 /* CAN DB values */
 #define DB_STATUS    (1)
 #define DB_ECTS      (2)
-#define DB_POS_X_h   (3) //TODO: High or low byte?
-#define DB_POS_X_l   (4) //TODO: High or low byte?
-#define DB_POS_Y_h   (5) //TODO: High or low byte?
-#define DB_POS_Y_l   (6) //TODO: High or low byte?
+#define DB_POS_X_h   (3)
+#define DB_POS_X_l   (4)
+#define DB_POS_Y_h   (5)
+#define DB_POS_Y_l   (6)
 
-/* data types -----------------------------------------------------------------*/
-xTaskHandle xECTS_updater_task_handle = NULL;
+/* data types ----------------------------------------------------------------*/
 
-/* function prototypes --------------------------------------------------------*/
+/* function prototypes -------------------------------------------------------*/
 static void  vECTS_updater_task(void *pvData);
-void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[]);
+void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message);
+void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message);
+void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message);
+void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]);
 
-/* data -----------------------------------------------------------------------*/
+/* data ----------------------------------------------------------------------*/
 ects ECTS_1 = {0, 0, conveyor_C};
 ects ECTS_2 = {0, 0, conveyor_C};
 ects ECTS_3 = {0, 0, conveyor_C};
 conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;
+uint8_t CAN_buffer[8];
 
-/* implementation -------------------------------------------------------------*/
+/* implementation ------------------------------------------------------------*/
 
 /*******************************************************************************
  *  function :    init_ECTS_updater_tasks
@@ -89,10 +107,18 @@ conveyorState conveyor_R_state = STOPPED;
  *  \return
  *
  ******************************************************************************/
-void  init_ECTS_updater_tasks(void) {
+void  init_ECTS_updater_task(void) {
 
-	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, &xECTS_updater_task_handle);
+	/* Set a CAN listener functions for conveyor status response */
+	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorL_status_response, STATUS_L);
+	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorR_status_response, STATUS_R);
+	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorC_status_response, STATUS_C);
+
+	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, NULL);
 }
+/* ****************************************************************************/
+/* End      :  init_ECTS_updater_tasks										  */
+/* ****************************************************************************/
 
 /*******************************************************************************
  *  function :    vECTS_updater_task
@@ -118,57 +144,129 @@ static void vECTS_updater_task(void *pvData) {
 		ECTS_2.x += X_STEP;
 		ECTS_3.x += X_STEP;
 
-		//TODO: CAN_Status_Abfrage()
-
-
-
+		/* Conveyor status request */
+		CAN_buffer[0] = DB_STATUS;
+		createCANMessage(GET_STATUS_L, 1, CAN_buffer);
+		createCANMessage(GET_STATUS_R, 1, CAN_buffer);
 
 		/* Delay until defined time passed */
-		vTaskDelayUntil(&xLastFlashTime, 200 / portTICK_RATE_MS);
+		vTaskDelayUntil(&xLastFlashTime, TIME_STEP / portTICK_RATE_MS);
 	}
 }
+/* ****************************************************************************/
+/* End      :  init_ECTS_updater_tasks										  */
+/* ****************************************************************************/
 
-/*******************************************************************************
- *  function :    CAN_conveyor_status_response
- ******************************************************************************/
-/** \brief        Function which is called by CAN gatekeeper when a conveyor
- *                status response was received.
- *
- *  \type         global
- *
- *  \param[in]	  conveyor    Number to identify from which conveyor the message
- *                            was. Use CONVEYOR_L, CONVEYOR_C, or CONVEYOR_M
- *
- *  \return       void
- *
- ******************************************************************************/
-void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[])
-{
-	if(DB[1] == MSG_STATUS) {
-		/* ERROR */
-		return;
+/******************************************************************************/
+/* Function:  CAN_conveyorL_status_response                                   */
+/******************************************************************************/
+/*! \brief Function which is called by CAN gatekeeper when a status
+*          response for the left conveyor was received.
+*
+* \param[in] *rx_message The received CAN message
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.0.1
+*
+* \date 12.03.2014 Created
+*
+*******************************************************************************/
+void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message) {
+
+	if(rx_message->data[0] == MSG_STATUS) {
+
+		/* Redirect to combined function */
+		CAN_conveyor_status_response(conveyor_L, rx_message->data);
 	}
+	/* Else: Error message received */
+}
+/* ****************************************************************************/
+/* End      :  CAN_conveyorL_status_response								  */
+/* ****************************************************************************/
+
+/******************************************************************************/
+/* Function:  CAN_conveyorR_status_response                                   */
+/******************************************************************************/
+/*! \brief Function which is called by CAN gatekeeper when a status
+*          response for the left conveyor was received.
+*
+* \param[in] *rx_message The received CAN message
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.0.1
+*
+* \date 12.03.2014 Created
+*
+*******************************************************************************/
+void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message) {
+
+	if(rx_message->data[0] == MSG_STATUS) {
+
+		/* Redirect to combined function */
+		CAN_conveyor_status_response(conveyor_R, rx_message->data);
+	}
+	/* Else: Error message received */
+}
+/* ****************************************************************************/
+/* End      :  CAN_conveyorR_status_response								  */
+/* ****************************************************************************/
+
+/******************************************************************************/
+/* Function:  CAN_conveyorC_status_response                                   */
+/******************************************************************************/
+/*! \brief Function which is called by CAN gatekeeper when a status
+*          response for the left conveyor was received.
+*
+* \param[in] *rx_message The received CAN message
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.0.1
+*
+* \date 12.03.2014 Created
+*
+*******************************************************************************/
+void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message) {
+
+	if(rx_message->data[0] == MSG_STATUS) {
+
+		/* Redirect to combined function */
+		CAN_conveyor_status_response(conveyor_C, rx_message->data);
+	}
+	/* Else: Error message received */
+}
+/* ****************************************************************************/
+/* End      :  CAN_conveyorC_status_response								  */
+/* ****************************************************************************/
+
+/******************************************************************************/
+/* Function:  CAN_conveyor_status_response                                   */
+/******************************************************************************/
+/*! \brief Function to handle conveyor status responses
+*
+* \param[in] *rx_message The received CAN message
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.0.1
+*
+* \date 12.03.2014 Created
+*
+*******************************************************************************/
+void CAN_conveyor_status_response(uint8_t conveyor, uint8_t data[]) {
 
 	/* Update conveyor state */
-	switch(conveyor) {
-	case CONVEYOR_L:
-		conveyor_L_state = DB[DB_STATUS];
-		break;
-
-	case CONVEYOR_C:
-		conveyor_C_state = DB[DB_STATUS];
-		break;
-
-	case CONVEYOR_R:
-		conveyor_R_state = DB[DB_STATUS];
-		break;
-
-	default:
-		/* Something went terribly wrong... */
-		//TODO: Handle?
-		return;
-		break;
-	}
+	conveyor_L_state = data[DB_STATUS];
 
 	ects *ECTS_p = NULL;
 
@@ -217,8 +315,8 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[])
 	if(ECTS_p) {
 
 		/* Finally set the position for the correct ECTS */
-		ECTS_p->x = (DB[DB_POS_X_h]<<8 & 0xFF00) | DB[DB_POS_X_l];
-		ECTS_p->y = (DB[DB_POS_Y_h]<<8 & 0xFF00) | DB[DB_POS_Y_l];
+		ECTS_p->x = (data[DB_POS_X_h]<<8 & 0xFF00) | data[DB_POS_X_l];
+		ECTS_p->y = (data[DB_POS_Y_h]<<8 & 0xFF00) | data[DB_POS_Y_l];
 	}
 	else {
 
@@ -226,3 +324,6 @@ void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[])
 		//TODO: Handle
 	}
 }
+/* ****************************************************************************/
+/* End      :  CAN_conveyor_status_response									  */
+/* ****************************************************************************/

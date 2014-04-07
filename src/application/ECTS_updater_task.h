@@ -1,19 +1,27 @@
-/**
- * \file    ECTS_updater_task.h
- * \author  kasen1
- * \date    2014-03-12
- *
- * \version 1.0
- *  import from template (2014-03-12)
- *
- * \brief   tasks to handle the conveyor and ECTS updater
- *
- * @{
- */
+/******************************************************************************/
+/*! \file ECTS_updater.h
+******************************************************************************
+* \brief Task to update the position of the ECTS structs
+*
+* Procedures : 	init_ECTS_updater_task()
+*
+* \author kasen1
+*
+* \version 0.0.1
+*
+* \history 12.03.2014 Import from template by wht4
+*
+*
+* \ingroup application
+*
+*/
+/* ****************************************************************************/
+/* Robo model                                                                 */
+/* ****************************************************************************/
 
 /* Define to prevent recursive inclusion --------------------------------------*/
-#ifndef ECTS_UPDATER_H_
-#define ECTS_UPDATER_H_
+#ifndef __APP_ECTS_UPDATER_TASK_H_
+#define __APP_ECTS_UPDATER_TASK_H_
 
 /* Includes -------------------------------------------------------------------*/
 #include <stdint.h>                      /* Integer typedefs                   */
@@ -33,26 +41,21 @@ typedef enum {STOPPED = 1, RUNNING = 2} conveyorState;
 #define ECTS_UPDATER_TASK_NAME       "ECTS-updater task"
 #define ECTS_UPDATER_STACK_SIZE      configMINIMAL_STACK_SIZE /* size of the receive and transmit task */
 #define ECTS_UPDATER_TASK_PRIORITY   (configMAX_PRIORITIES - 4UL) /* priority 4*/
-/* Conveyors */
-#define CONVEYOR_L (0)
-#define CONVEYOR_C (1)
-#define CONVEYOR_R (2)
 
 /* exported macro -------------------------------------------------------------*/
 
 /* exported variables ---------------------------------------------------------*/
-ects ECTS_1;
-ects ECTS_2;
-ects ECTS_3;
-conveyorState conveyor_L_state;
-conveyorState conveyor_C_state;
-conveyorState conveyor_R_state;
+extern ects ECTS_1;
+extern ects ECTS_2;
+extern ects ECTS_3;
+extern conveyorState conveyor_L_state;
+extern conveyorState conveyor_C_state;
+extern conveyorState conveyor_R_state;
 
 /* exported function prototypes -----------------------------------------------*/
-extern void init_ECTS_updater_tasks(void);
-void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[]);
+extern void init_ECTS_updater_task(void);
 
-#endif /* ECTS_UPDATER_H_ */
+#endif /* __APP_ECTS_UPDATER_TASK_H_ */
 
 /**
  * @}
