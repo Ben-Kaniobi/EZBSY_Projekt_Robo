@@ -1,19 +1,29 @@
-/**
- * \file    ECTS_updater_task.h
- * \author  kasen1
- * \date    2014-03-12
- *
- * \version 1.0
- *  import from template (2014-03-12)
- *
- * \brief   tasks to handle the conveyor and ECTS updater
- *
- * @{
- */
+/******************************************************************************/
+/*! \file ECTS_updater.h
+******************************************************************************
+* \brief Task to update the position of the ECTS structs
+*
+* Procedures : 	vECTS_updater_task(void*)
+* 				init_ECTS_updater_tasks()
+*              	CAN_conveyor_status_response()
+*
+* \author kasen1
+*
+* \version 0.0.1
+*
+* \history 12.03.2014 Import from template by wht4
+*
+*
+* \ingroup application
+*
+*/
+/* ****************************************************************************/
+/* Robo model                                                                 */
+/* ****************************************************************************/
 
 /* Define to prevent recursive inclusion --------------------------------------*/
-#ifndef ECTS_UPDATER_H_
-#define ECTS_UPDATER_H_
+#ifndef __APP_ECTS_UPDATER_TASK_H_
+#define __APP_ECTS_UPDATER_TASK_H_
 
 /* Includes -------------------------------------------------------------------*/
 #include <stdint.h>                      /* Integer typedefs                   */
@@ -50,9 +60,8 @@ conveyorState conveyor_R_state;
 
 /* exported function prototypes -----------------------------------------------*/
 extern void init_ECTS_updater_tasks(void);
-void CAN_conveyor_status_response(uint8_t conveyor, uint8_t DB[]);
 
-#endif /* ECTS_UPDATER_H_ */
+#endif /* __APP_ECTS_UPDATER_TASK_H_ */
 
 /**
  * @}
