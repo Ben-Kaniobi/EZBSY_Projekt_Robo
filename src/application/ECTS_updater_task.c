@@ -93,7 +93,7 @@ ects ECTS_3 = {0, 0, conveyor_C};
 conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;
-char CAN_buffer[8];
+uint8_t CAN_buffer[8];
 
 /* implementation ------------------------------------------------------------*/
 
