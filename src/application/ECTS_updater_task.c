@@ -325,7 +325,7 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 		if(!ECTS_p) {
 
 			/* ECTS_p hasn't been set before, set it now */
-			ECTS_p = &ECTS_1;
+			ECTS_p = &ECTS_2;
 		}
 		else {
 
@@ -344,14 +344,14 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 		if(!ECTS_p) {
 
 			/* ECTS_p hasn't been set before, set it now */
-			ECTS_p = &ECTS_1;
+			ECTS_p = &ECTS_3;
 		}
 		else {
 
 			/* ECTS_p has been set before, compare x values */
 			if(ECTS_3.x > ECTS_p->x) {
 
-				/* ECTS_2 is further, use this */
+				/* ECTS_3 is further, use this */
 				ECTS_p = &ECTS_3;
 			}
 		}
@@ -359,13 +359,13 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 	if(ECTS_p) {
 
 		/* Concat the two bytes */
-		uint16_t raw_pos_x = (data[DB_POS_X_h]<<8 & 0xFF00) | (data[DB_POS_X_l] & 0xFF);
+		uint16_t pos_x = (data[DB_POS_X_h]<<8 & 0xFF00) | (data[DB_POS_X_l] & 0xFF);
 		/* Convert to our format */
-		//raw_pos_x = TODO raw_pos_x;
+		//pos_x = TODO pos_x;
 		/* Get mutex for ECTS access */
 	    if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
 			/* Finally set the position for the correct ECTS */
-			ECTS_p->x = raw_pos_x;
+			ECTS_p->x = pos_x;
 			/* Release semaphore */
 	        xSemaphoreGive(xMutexEditECTS);
 	    }
@@ -374,14 +374,14 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 		if(data[DB_ECTS_INFO] == 3) {
 
 			/* Concat the two bytes */
-			uint16_t raw_pos_y = (data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
+			uint16_t pos_y = (data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
 			/* Convert to our format */
-			//raw_pos_y = TODO raw_pos_y;
+			//pos_y = TODO pos_y;
 			/* Finally set the position for the correct ECTS */
 			/* Get mutex for ECTS access */
 		    if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
 				/* Finally set the position for the correct ECTS */
-				ECTS_p->y = raw_pos_y;
+				ECTS_p->y = pos_y;
 				/* Release semaphore */
 		        xSemaphoreGive(xMutexEditECTS);
 		    }
