@@ -330,7 +330,7 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 		if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
 			/* Finally set the position for the correct ECTS */
 			ECTS_p->x = pos_x;
-			/* Release semaphore */
+			/* Release mutex */
 			xSemaphoreGive(xMutexEditECTS);
 		}
 
@@ -346,7 +346,7 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 			if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
 				/* Finally set the position for the correct ECTS */
 				ECTS_p->y = pos_y;
-				/* Release semaphore */
+				/* Release mutex */
 				xSemaphoreGive(xMutexEditECTS);
 			}
 		}
@@ -361,6 +361,9 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 /******************************************************************************/
 /*! \brief Finds the correct ECTS and updates the positions for an ECTS that
 *          changes to a new z position (e.g. conveyor to robo)
+*
+* \note Changing the z position is done with a mutex, so you don't have to
+*       worry about that.
 *
 * \param[in] new_z The new position for the ECTS
 *
@@ -408,8 +411,13 @@ void update_ECTS_z(z_pos new_z) {
 
 	/* Only update if an ECTS was found */
 	if(!ECTS_p) {
-		/* Update z */
-		ECTS_p->z = new_z;
+		/* Get mutex for ECTS access */
+		if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
+			/* Update z */
+			ECTS_p->z = new_z;
+			/* Release mutex */
+			xSemaphoreGive(xMutexEditECTS);
+		}
 	}
 }
 /* ****************************************************************************/
