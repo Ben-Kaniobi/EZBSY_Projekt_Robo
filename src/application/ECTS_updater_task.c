@@ -4,7 +4,7 @@
 * \brief Task to update the position of the ECTS structs
 *
 * Procedures :  vECTS_updater_task(void*)
-*               init_ECTS_updater_tasks()
+*               InitECTSUpdaterTask()
 *               CAN_conveyorL_status_response(CARME_CAN_MESSAGE*)
 *               CAN_conveyorR_status_response(CARME_CAN_MESSAGE*)
 *               CAN_conveyorC_status_response(CARME_CAN_MESSAGE*)
@@ -104,7 +104,7 @@ xSemaphoreHandle xMutexEditECTS = NULL;
 /* implementation ------------------------------------------------------------*/
 
 /*******************************************************************************
- *  function :    init_ECTS_updater_tasks
+ *  function :    InitECTSUpdaterTask
  ******************************************************************************/
 /** \brief        Initialisation for task
  *
@@ -113,7 +113,7 @@ xSemaphoreHandle xMutexEditECTS = NULL;
  *  \return
  *
  ******************************************************************************/
-void  init_ECTS_updater_task(void) {
+void  InitECTSUpdaterTask(void) {
 
 	/* Set a CAN listener functions for conveyor status response */
 	setFunctionCANListener((CAN_function_listener_t)CAN_conveyorL_status_response, STATUS_L);
@@ -126,7 +126,7 @@ void  init_ECTS_updater_task(void) {
 	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, NULL);
 }
 /* ****************************************************************************/
-/* End      :  init_ECTS_updater_tasks                                        */
+/* End      :  InitECTSUpdaterTask                                            */
 /* ****************************************************************************/
 
 /*******************************************************************************
@@ -357,7 +357,7 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 /* ****************************************************************************/
 
 /******************************************************************************/
-/* Function:  update_ECTS_z                                                   */
+/* Function :  update_ECTS_z                                                   */
 /******************************************************************************/
 /*! \brief Finds the correct ECTS and updates the positions for an ECTS that
 *          changes to a new z position (e.g. conveyor to robo)

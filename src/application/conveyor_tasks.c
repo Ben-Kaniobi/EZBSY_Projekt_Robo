@@ -5,8 +5,7 @@
 *
 * Procedures : 	vConveyorL_task(void*)
 *               vConveyorR_task(void*)
-* 				init_ConveyorL_task()
-* 				init_ConveyorL_task()
+* 				InitConveyorTasks()
 *
 * \author kasen1
 *
@@ -77,14 +76,9 @@ static void vConveyorL_task(void*);
 static void vConveyorR_task(void*);
 
 
-/* ****************************************************************************/
-/* End Header : default_task.c												  */
-/* ****************************************************************************/
-
-
 
 /*******************************************************************************
- *  function :    init_Conveyor_tasks
+ *  function :    InitConveyorTasks
  ******************************************************************************/
 /** \brief        Initialisation for task
  *
@@ -93,18 +87,18 @@ static void vConveyorR_task(void*);
  *  \return
  *
  ******************************************************************************/
-void init_Conveyor_tasks(void)
+void InitConveyorTasks(void)
 {
 	/* Create and take the ECTS semaphores */
 	xSemaphoreLeftECTS = xSemaphoreCreateBinary();
 	xSemaphoreRightECTS = xSemaphoreCreateBinary();
 
-    /* Create the tasks */
-    xTaskCreate(vConveyorL_task, ( signed char * ) CONVEYOR_L_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
-    xTaskCreate(vConveyorR_task, ( signed char * ) CONVEYOR_R_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
+	/* Create the tasks */
+	xTaskCreate(vConveyorL_task, ( signed char * ) CONVEYOR_L_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
+	xTaskCreate(vConveyorR_task, ( signed char * ) CONVEYOR_R_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
 }
 /* ****************************************************************************/
-/* End      :  init_Conveyor_tasks											  */
+/* End      :  InitConveyorTasks											  */
 /* ****************************************************************************/
 
 /*******************************************************************************
@@ -121,47 +115,47 @@ void init_Conveyor_tasks(void)
  ******************************************************************************/
 static void vConveyorL_task(void* pvParameters )
 {
-    portTickType xLastFlashTime;
+	portTickType xLastFlashTime;
 
-    /* We need to initialise xLastFlashTime prior to the first call to
-    vTaskDelayUntil(). */
-    xLastFlashTime = xTaskGetTickCount();
+	/* We need to initialise xLastFlashTime prior to the first call to
+	vTaskDelayUntil(). */
+	xLastFlashTime = xTaskGetTickCount();
 
-    /* Take the ECTS semaphore */
-    xSemaphoreTake(xSemaphoreLeftECTS, portMAX_DELAY);
+	/* Take the ECTS semaphore */
+	xSemaphoreTake(xSemaphoreLeftECTS, portMAX_DELAY);
 
-    for(;;)
-    {
-    	/* Wait for the conveyor semaphore */
-        if(xSemaphoreTake(xSemaphoreLeftECTS, portMAX_DELAY) == pdTRUE) {
+	for(;;)
+	{
+		/* Wait for the conveyor semaphore */
+		if(xSemaphoreTake(xSemaphoreLeftECTS, portMAX_DELAY) == pdTRUE) {
 
-        	/* Send "stop the conveyor at position" message */
-        	CAN_buffer[0] = MSG_STOP;
-        	CAN_buffer[1] = CONVEYOR_STOP_POS_H;
-        	CAN_buffer[2] = CONVEYOR_STOP_POS_L;
-    		createCANMessage(CMD_L, 3, CAN_buffer);
+			/* Send "stop the conveyor at position" message */
+			CAN_buffer[0] = MSG_STOP;
+			CAN_buffer[1] = CONVEYOR_STOP_POS_H;
+			CAN_buffer[2] = CONVEYOR_STOP_POS_L;
+			createCANMessage(CMD_L, 3, CAN_buffer);
 
-        	/* Start the conveyor */
-        	CAN_buffer[0] = MSG_START;
-        	CAN_buffer[1] = 0;
-        	CAN_buffer[2] = 0;
-    		createCANMessage(CMD_L, 3, CAN_buffer);
+			/* Start the conveyor */
+			CAN_buffer[0] = MSG_START;
+			CAN_buffer[1] = 0;
+			CAN_buffer[2] = 0;
+			createCANMessage(CMD_L, 3, CAN_buffer);
 
-    		/* Wait while conveyor still moving */
-    		while(conveyor_L_state != STOPPED) {
+			/* Wait while conveyor still moving */
+			while(conveyor_L_state != STOPPED) {
 
-    			vTaskDelay(50 / portTICK_RATE_MS);
-    		}
+				vTaskDelay(50 / portTICK_RATE_MS);
+			}
 
-    		/* Conveyor stopped, give ECTS semaphore */
-    	    xSemaphoreGive(xSemaphoreLeftECTS);
+			/* Conveyor stopped, give ECTS semaphore */
+			xSemaphoreGive(xSemaphoreLeftECTS);
 
-    	    /* Update the ECTS */
-    	    update_ECTS_z(robo_L);
-        }
+			/* Update the ECTS */
+			update_ECTS_z(robo_L);
+		}
 
-        vTaskDelayUntil(&xLastFlashTime, 200 / portTICK_RATE_MS);
-    }
+		vTaskDelayUntil(&xLastFlashTime, 200 / portTICK_RATE_MS);
+	}
 }
 /* ****************************************************************************/
 /* End      :  vConveyorL_task												  */
@@ -216,8 +210,8 @@ static void vConveyorR_task(void* pvParameters )
 			/* Conveyor stopped, give ECTS semaphore */
 			xSemaphoreGive(xSemaphoreRightECTS);
 
-    	    /* Update the ECTS */
-    	    update_ECTS_z(robo_R);
+			/* Update the ECTS */
+			update_ECTS_z(robo_R);
 		}
 
 		vTaskDelayUntil(&xLastFlashTime, 200 / portTICK_RATE_MS);
