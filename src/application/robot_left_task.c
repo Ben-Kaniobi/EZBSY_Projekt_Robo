@@ -106,6 +106,9 @@ void vRobotLeftTask( void *pvParameters )
     /* Give unloading tray semaphore free */
     xSemaphoreGive( xSemaphoreEctsTray );
 
+    /* Release semaphore that locks the conveyor from moving */
+	xSemaphoreGive( xSemaphoreLeftConveyor );
+
 	/* Prepare robot to take up an ECTS */
 	createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ PrepareToTakeEcts ] );
     vTaskDelay( 1500 / portTICK_RATE_MS );
