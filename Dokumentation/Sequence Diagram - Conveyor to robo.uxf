@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="12.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.umlet.element.SequenceDiagram</type>
+    <coordinates>
+      <x>130</x>
+      <y>30</y>
+      <w>300</w>
+      <h>500</h>
+    </coordinates>
+    <panel_attributes>title: ECTS from conveyor to robo
+_Conveyor task~tF_|_Robo task~tR_
+
+iframe{:Init
+tF&gt;tF:tF,tR:Init
+iframe}
+
+iframe{:Loop
+tF.&gt;tR:tF,tR:Take Sema. conv.
+
+tF&gt;tF:tR
+tR-&gt;tF:tR:Give Sema. conv.
+tF&gt;tF:tF,tR
+tR.&gt;tF:tF,tR:Take Sema. ECTS
+tF&gt;tF:tF
+tF-&gt;tR:tF:Give Sema. ECTS
+tF&gt;tF:tF,tR
+iframe}
+
+
+
+
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

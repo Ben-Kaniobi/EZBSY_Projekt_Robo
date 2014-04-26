@@ -26,10 +26,12 @@
 /* RTOS */
 #include <memPoolService.h>
 /* Application */
-#include "ECTS_updater_task.h"
 #include "lcd_task.h"
 #include "CAN_gatekeeper_task.h"
 #include "UART_task.h"
+#include "ECTS_updater_task.h"
+#include "flipper_task.h"
+#include "conveyor_tasks.h"
 #include "init_robot_tasks.h"
 
 #include  "inc/lcd.h"                          /* Graphic Library                */
@@ -69,14 +71,16 @@ int  main(void) {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
     /* module initialisation */
-	init_ECTS_updater_task();
 	InitLCDTask();
 	InitUARTTask();
 	InitCANGatekeeperTask();
+	InitECTSUpdaterTask();
+	InitFlipperTask();
+	InitConveyorTasks();
 	InitRobotTasks();
 
 	/*Example for CAN usage*/
-//	setFunctionCANListener((CAN_function_listener_t)CANTest, 0x143);
+	setFunctionCANListener((CAN_function_listener_t)CANTest, 0x143);
 //	createCANMessage(0x142, 3, data);
 
     vTaskStartScheduler();

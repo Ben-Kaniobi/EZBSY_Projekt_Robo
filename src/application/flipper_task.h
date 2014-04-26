@@ -1,9 +1,9 @@
 /******************************************************************************/
-/*! \file conveyor_tasks.h
+/*! \file flipper_task.h
 ******************************************************************************
-* \brief Tasks to handle the left and right conveyors
+* \brief Task to handle the flipper and conveyor
 *
-* Procedures : 	InitConveyorTasks()
+* Procedures : 	InitFlipperTask()
 *
 * \author kasen1
 *
@@ -20,8 +20,8 @@
 /* ****************************************************************************/
 
 /* Define to prevent recursive inclusion --------------------------------------*/
-#ifndef __APP_CONVEYOR_TASKS_H_
-#define __APP_CONVEYOR_TASKS_H_
+#ifndef __APP_FLIPPER_TASK_H_
+#define __APP_FLIPPER_TASK_H_
 
 /* --------------------------------- imports ---------------------------------*/
 
@@ -29,25 +29,22 @@
 /* ----------------------- module constant declaration -----------------------*/
 
 /* RTOS configuration */
-#define CONVEYOR_L_TASK_NAME		"Conveyor left task"
-#define CONVEYOR_R_TASK_NAME		"Conveyor right task"
-#define CONVEYOR_TASK_STACK_SIZE	configMINIMAL_STACK_SIZE 		/*!< size of the task's stack */
-#define CONVEYOR_TASK_PRIORITY		(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
+#define FLIPPER_TASK_NAME			"Flipper task"
+#define FLIPPER_TASK_STACK_SIZE	configMINIMAL_STACK_SIZE 		/*!< size of the task's stack */
+#define FLIPPER_TASK_PRIORITY		(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
 
 
 /* ------------------------- module type declaration -------------------------*/
 
 
 /* ------------------------- module data declaration -------------------------*/
-extern xSemaphoreHandle xSemaphoreLeftECTS;				/* Left ECTS is ready */
-extern xSemaphoreHandle xSemaphoreRightECTS;			/* Right ECTS is ready */
 
 
 /* ----------------------- module procedure declaration ----------------------*/
 
-extern void InitConveyorTasks(void);
+extern void InitFlipperTask(void);
 
 /* ****************************************************************************/
 /* End Header : default_task.h												  */
 /* ****************************************************************************/
-#endif /* __APP_CONVEYOR_TASKS_H_ */
+#endif /* __APP_FLIPPER_TASK_H_ */
