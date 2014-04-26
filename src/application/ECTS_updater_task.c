@@ -78,9 +78,9 @@
 #define DB_POS_Y_h   (5)
 #define DB_POS_Y_l   (6)
 /* Position */
-#define X_STEP_MAX   (47)                /* Max. position in cm for x direction */
+#define X_STEP_MAX   (37)                /* Max. position in cm for x direction */
 #define X_SENS_LR    (9)                 /* Position in cm for the left/right sensor */
-#define X_SENS_C     (22)                /* Position in cm for the center sensor */
+#define X_SENS_C     (23)                /* Position in cm for the center sensor */
 
 /* macros --------------------------------------------------------------------*/
 #define X_DATA_TO_CM(x) (0.0048f * (x))    /* Convert X data from CAN to cm (0x186A -> 30cm) */
@@ -96,9 +96,9 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]);
 void find_ECTS(ects *ECTS_p, z_pos conveyor);
 
 /* data ----------------------------------------------------------------------*/
-ects ECTS_1 = {0, 0, 0, conveyor_L};
-ects ECTS_2 = {1, 0, 0, conveyor_C};
-ects ECTS_3 = {2, 0, 0, conveyor_R};
+ects ECTS_1 = {0, 0, 4, conveyor_C};
+ects ECTS_2 = {1, 0, 4, conveyor_C};
+ects ECTS_3 = {2, 0, 4, conveyor_C};
 conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;
@@ -152,22 +152,26 @@ static void vECTS_updater_task(void *pvData) {
 	xLastFlashTime = xTaskGetTickCount();
 
 	for(EVER) {
+		/* Get mutex for ECTS access */
+		if(xSemaphoreTake(xMutexEditECTS, (TIME_STEP/4) / portTICK_RATE_MS) == pdTRUE) {
 
-//		if(ECTS_1.x >= X_STEP_MAX) {
-//
-//			ECTS_1.x = 0;
-//		}
-//		if(ECTS_2.x >= X_STEP_MAX) {
-//
-//			ECTS_2.x = 0;
-//		}
-//		if(ECTS_3.x >= X_STEP_MAX) {
-//
-//			ECTS_3.x = 0;
-//		}
-//		ECTS_1.x += X_STEP;
-//		ECTS_2.x += X_STEP;
-//		ECTS_3.x += X_STEP;
+			/* Updater x position */
+			if(ECTS_1.x < X_STEP_MAX) {
+
+				ECTS_1.x += X_STEP;
+			}
+			if(ECTS_2.x < X_STEP_MAX) {
+
+				ECTS_2.x += X_STEP;
+			}
+			if(ECTS_3.x < X_STEP_MAX) {
+
+				ECTS_3.x += X_STEP;
+			}
+
+			/* Release mutex */
+			xSemaphoreGive(xMutexEditECTS);
+		}
 
 		/* Conveyor status request */
 		CAN_buffer[0] = DB_STATUS;
@@ -330,6 +334,21 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 		uint16_t pos_x = (data[DB_POS_X_h]<<8 & 0xFF00) | (data[DB_POS_X_l] & 0xFF);
 		/* Convert to our format */
 		pos_x = X_DATA_TO_CM(pos_x);
+
+		/* Add sensor position offset */
+		switch(conveyor) {
+		case conveyor_L: /* Fall through */
+		case conveyor_R:
+			pos_x += X_SENS_LR;
+
+		case conveyor_C:
+			pos_x += X_SENS_C;
+
+		default:
+			/* Not possible, caught above */
+			return;
+		}
+
 		/* Get mutex for ECTS access */
 		if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
 			/* Finally set the position for the correct ECTS */
@@ -338,49 +357,49 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 			xSemaphoreGive(xMutexEditECTS);
 		}
 
-		/* If theres data for the y position available, update this too */
-		if(data[DB_ECTS_INFO] == 3) {
-
-			/* Concat the two bytes */
-			uint16_t pos_y = (data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
-			/* Convert to our format (conveyor width divided in 8 sections/lines) */
-			if(pos_y <= 868) /* between 800 and 868 */ {
-				pos_y = 0;
-			}
-			else if(pos_y <= 1004) {
-				pos_y = 1;
-			}
-			else if(pos_y <= 1139) {
-				pos_y = 2;
-			}
-			else if(pos_y <= 1275) {
-				pos_y = 3;
-			}
-			else if(pos_y <= 1411) {
-				pos_y = 4;
-			}
-			else if(pos_y <= 1546) {
-				pos_y = 5;
-			}
-			else if(pos_y <= 1682) {
-				pos_y = 6;
-			}
-			else /* -> pos_y <= 1750 */ {
-				pos_y = 7;
-			}
-			/* Reverse order if it's left conveyor, because the light barrier is the other way around */
-			if(conveyor == conveyor_L) {
-				pos_y = 7-pos_y;
-			}
-			/* Finally set the position for the correct ECTS */
-			/* Get mutex for ECTS access */
-			if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
-				/* Finally set the position for the correct ECTS */
-				ECTS_p->y = pos_y;
-				/* Release mutex */
-				xSemaphoreGive(xMutexEditECTS);
-			}
-		}
+//		/* If theres data for the y position available, update this too */
+//		if(data[DB_ECTS_INFO] == 3) {
+//
+//			/* Concat the two bytes */
+//			uint16_t pos_y = ((uint16_t)data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
+//			/* Convert to our format (conveyor width divided in 8 sections/lines) */
+//			if(pos_y <= 868) /* between 800 and 868 */ {
+//				pos_y = 0;
+//			}
+//			else if(pos_y <= 1004) {
+//				pos_y = 1;
+//			}
+//			else if(pos_y <= 1139) {
+//				pos_y = 2;
+//			}
+//			else if(pos_y <= 1275) {
+//				pos_y = 3;
+//			}
+//			else if(pos_y <= 1411) {
+//				pos_y = 4;
+//			}
+//			else if(pos_y <= 1546) {
+//				pos_y = 5;
+//			}
+//			else if(pos_y <= 1682) {
+//				pos_y = 6;
+//			}
+//			else /* -> pos_y <= 1750 */ {
+//				pos_y = 7;
+//			}
+//			/* Reverse order if it's left conveyor, because the light barrier is the other way around */
+//			if(conveyor == conveyor_L) {
+//				pos_y = 7-pos_y;
+//			}
+//			/* Finally set the position for the correct ECTS */
+//			/* Get mutex for ECTS access */
+//			if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
+//				/* Finally set the position for the correct ECTS */
+//				ECTS_p->y = pos_y;
+//				/* Release mutex */
+//				xSemaphoreGive(xMutexEditECTS);
+//			}
+//		}
 	}
 }
 /* ****************************************************************************/
@@ -444,7 +463,15 @@ void update_ECTS_z(z_pos new_z) {
 	if(!ECTS_p) {
 		/* Get mutex for ECTS access */
 		if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
-			/* Update z */
+			/* Update */
+			if(new_z != conveyor_C) {
+				ECTS_p->x = 0;
+			}
+			else
+			{
+				ECTS_p->x = 6;
+			}
+			ECTS_p->y = 0;
 			ECTS_p->z = new_z;
 			/* Release mutex */
 			xSemaphoreGive(xMutexEditECTS);

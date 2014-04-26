@@ -35,15 +35,17 @@
 /* CAN IDs */
 #define CMD_FLIPPER  (0x142)            /* CAN id for flipper command         */
 #define CMD_C        (0x122)            /* CAN id for center conveyor command */
+#define RESET_C      (0x12F)            /* Reset for center conveyer          */
 /* CAN messages */
 #define MSG_START    (0x01)             /* CAN message to start conveyor      */
+#define MSG_DONE     (0x04)
 #define MSG_FLIP     (0x01)             /* CAN message to move flipper        */
 /* CAN DB values */
 #define DB_SPEED     (0x50)             /* Speed for the flipper, 5-255, 0 for default */
 #define DB_POS_L     (150)              /* Left flipper position              */
 #define DB_POS_R     (105)              /* Right flipper position             */
 /* Flipper */
-#define FLIPPER_X_MIN (37)              /* Min. x pos. in cm for ECTS to be in flipper area */
+#define FLIPPER_X_MIN (39)              /* Min. x pos. in cm for ECTS to be in flipper area */
 
 /* ------------------------- module data declaration -------------------------*/
 uint8_t CAN_buffer[8];
@@ -91,6 +93,9 @@ static void vFlipper_task(void* pvParameters )
 	vTaskDelayUntil(). */
 	xLastFlashTime = xTaskGetTickCount();
 
+	/* Send reset command */
+	createCANMessage(RESET_C, 0, CAN_buffer);
+
 	/* Start the center conveyor */
 	CAN_buffer[0] = MSG_START;
 	CAN_buffer[1] = 0;
@@ -117,9 +122,15 @@ static void vFlipper_task(void* pvParameters )
 				/* ECTS in reach, toggle flipper */
 				if(flipper_shadow == FLIPPER_LEFT) {
 					flipper_shadow = FLIPPER_RIGHT;
+
+					/* Update z position */
+					update_ECTS_z(conveyor_R);
 				}
 				else {
 					flipper_shadow = FLIPPER_LEFT;
+
+					/* Update z position */
+					update_ECTS_z(conveyor_L);
 				}
 
 				/* Set the flipper position */

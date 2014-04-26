@@ -712,19 +712,6 @@ sema. conv.</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <type>com.umlet.element.custom.State</type>
-    <coordinates>
-      <x>568</x>
-      <y>184</y>
-      <w>80</w>
-      <h>32</h>
-    </coordinates>
-    <panel_attributes>bg=yellow
-Take
-sema. ETCS</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
     <type>com.umlet.element.Relation</type>
     <coordinates>
       <x>584</x>
@@ -804,5 +791,18 @@ conv. at pos.
     </coordinates>
     <panel_attributes>lt=&lt;-</panel_attributes>
     <additional_attributes>24;48;24;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.custom.State</type>
+    <coordinates>
+      <x>568</x>
+      <y>184</y>
+      <w>80</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>bg=yellow
+(Take
+sema. ETCS)</panel_attributes>
+    <additional_attributes/>
   </element>
 </diagram>
