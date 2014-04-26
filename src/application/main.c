@@ -26,7 +26,7 @@
 /* RTOS */
 #include <memPoolService.h>
 /* Application */
-#include "lcd_task.h"
+#include "UI_task.h"
 #include "CAN_gatekeeper_task.h"
 #include "UART_task.h"
 #include "ECTS_updater_task.h"
@@ -73,7 +73,7 @@ int  main(void) {
 
     /* module initialisation */
 	btn_initInterrupt();
-	InitLCDTask();
+	InitUITask();
 	InitUARTTask();
 	InitCANGatekeeperTask();
 	InitECTSUpdaterTask();

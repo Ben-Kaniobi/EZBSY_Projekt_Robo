@@ -54,7 +54,7 @@
 //----- Function prototypes ----------------------------------------------------
 
 //----- Data -------------------------------------------------------------------
-char ECTSString[20];
+char ECTSString[50];
 //----- Implementation ---------------------------------------------------------
 
 /*******************************************************************************
@@ -185,7 +185,7 @@ void MyEXTI9_5_IRQHandler(void) {
 
         EXTI_ClearITPendingBit(EXTI_Line7);
 
-		sprintf(ECTSString, "ECTS Position X:%d Y:%d", ECTS_1.x, ECTS_1.y);
+		sprintf(ECTSString, "ECTS Position 10  Y:456");
 		createUARTMessage(ECTSString);
     }
 }

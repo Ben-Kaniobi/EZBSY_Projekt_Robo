@@ -1,5 +1,5 @@
 /******************************************************************************/
-/*! \file lcd_task.c
+/*! \file UI_task.c
 ******************************************************************************
 * \brief File to draw the state of the robo model
 *
@@ -29,11 +29,14 @@
 #include "stm32f4xx.h"			/* uC includes */
 
 /* application */
-#include "lcd_task.h"		/* Own header include */
+#include "UI_task.h"			/* Own header include */
 #include "ECTS_updater_task.h"
+#include "UART_task.h"
 
 #include  "inc/lcd.h"		/* Graphic Library */
 #include <ff.h>				/* FatFs */
+#include "carme_io1.h"		/* Carme IO include */
+#include <stdio.h>
 
 
 /* ------------------------- module data declaration -------------------------*/
@@ -44,42 +47,43 @@ ects oldECTS[3];
 
 /* Variables for the left conveyor animation */
 int xLine1Left = 135;
-int xLine2Left = 101;
-int xLine3Left = 65;
+int xLine2Left = 99;
+int xLine3Left = 63;
 int yLinesLeft = 191;
 
 /* Variables for the right conveyor animation */
-int xLine1Right = 185;
-int xLine2Right = 221;
-int xLine3Right = 255;
+int xLine1Right = 186;
+int xLine2Right = 222;
+int xLine3Right = 258;
 int yLinesRight = 191;
 
 /* Variables for the middle conveyor animation */
-int yLine1Center = 93;
-int yLine2Center = 129;
-int yLine3Center = 163;
+int yLine1Center = 96;
+int yLine2Center = 132;
+int yLine3Center = 168;
 int xLinesCenter = 150;
 
 /* ----------------------- module procedure declaration ----------------------*/
 
-static void vLCDTask(void*);
+static void vUITask(void*);
 static void updateECTS(ects myECTS);
 static void drawECTS(uint16_t Xpos, uint16_t Ypos, LCDCOLOR Color);
 static void updateConveyorLeft(void);
 static void updateConveyorCenter(void);
 static void updateConveyorRight(void);
+static void uartPrintHandler(void);
 
 
 /* ****************************************************************************/
-/* End Header : lcd_task.c													  */
+/* End Header : UI_task.c													  */
 /* ****************************************************************************/
 
 
 
 /******************************************************************************/
-/* Function:  InitLCDTask													  */
+/* Function:  InitUITask													  */
 /******************************************************************************/
-/*! \brief Init function of the LCD task
+/*! \brief Init function of the UI task
 *
 * \return None
 *
@@ -87,14 +91,17 @@ static void updateConveyorRight(void);
 *
 * \version 0.0.1
 *
-* \date 24.03.2014 File Created
+* \date 24.03.2014 Function Created
 *
 *******************************************************************************/
 
-void InitLCDTask(void)
+void InitUITask(void)
 {
 	/* Init of the LCD */
 	LCD_Init();
+
+	/* init the carme IO's */
+	CARME_IO1_Init();
 
 //	/* FatFs mount */
 //	if (f_mount(&lcd_fs, "0:", 1) != FR_OK) {
@@ -111,19 +118,19 @@ void InitLCDTask(void)
     LCD_DisplayStringCenter(6, "Hello World");
 
     /* create the task */
-    xTaskCreate( vLCDTask, ( signed char * ) LCD_TASK_NAME, LCD_STACK_SIZE, NULL, LCD_TASK_PRIORITY, NULL );
+    xTaskCreate( vUITask, ( signed char * ) UI_TASK_NAME, UI_STACK_SIZE, NULL, UI_TASK_PRIORITY, NULL );
 }
 
 /* ****************************************************************************/
-/* End      :  InitLCDTask													  */
+/* End      :  InitUITask													  */
 /* ****************************************************************************/
 
 
 
 /******************************************************************************/
-/* Function:  vLCDTask														  */
+/* Function:  vUITask														  */
 /******************************************************************************/
-/*! \brief The LCD function itself
+/*! \brief The Ui's function itself
 *
 * \param[in] pvParameters  Pointer for given parameter
 *
@@ -133,11 +140,11 @@ void InitLCDTask(void)
 *
 * \version 0.0.1
 *
-* \date 24.03.2014 File Created
+* \date 24.03.2014 Function Created
 *
 *******************************************************************************/
 
-static void vLCDTask(void* pvParameters )
+static void vUITask(void* pvParameters )
 {
     portTickType xLastFlashTime;
 
@@ -150,7 +157,21 @@ static void vLCDTask(void* pvParameters )
 
     for(;;)
     {
-    	/* Code here */
+    	int counter;
+
+    	for(counter = 0; counter < 3; counter++)
+    	{
+        	/* Clear the old position of the ECTS (unless it's 0:0) */
+        	if(oldECTS[counter].x != 0 && oldECTS[counter].y != 0)
+        	{
+        		drawECTS(oldECTS[counter].x, oldECTS[counter].y, LCD_COLOR_CONVEYOR_GREEN);
+        	}
+    	}
+
+//    	/* Test ECTS for positioning */
+//    	ects TestECTS_1 = {0, 0, 7, conveyor_L};
+//    	ects TestECTS_2 = {1, 0, 7, conveyor_C};
+//    	ects TestECTS_3 = {2, 0, 7, conveyor_R};
 
     	updateConveyorLeft();
     	updateConveyorRight();
@@ -159,12 +180,15 @@ static void vLCDTask(void* pvParameters )
     	updateECTS(ECTS_2);
     	updateECTS(ECTS_3);
 
+    	uartPrintHandler();
+
+
         vTaskDelayUntil( &xLastFlashTime, 200 / portTICK_RATE_MS);
     }
 }
 
 /* ****************************************************************************/
-/* End      :  vLCDTask														  */
+/* End      :  vUITask														  */
 /* ****************************************************************************/
 
 
@@ -194,24 +218,24 @@ static void updateECTS(ects myECTS)
 		case conveyor_L:
 
 			/* Calculate the pixel position of the ECTS */
-			x = CONVEYOR_L_X_OFFSET - PIXEL_PER_STEP * myECTS.x;
-			y = CONVEYOR_L_Y_OFFSET + PIXEL_PER_STEP * myECTS.y;
+			x = CONVEYOR_L_X_OFFSET - ECTS_PIXEL_PER_STEP * myECTS.x;
+			y = CONVEYOR_L_Y_OFFSET + ECTS_PIXEL_PER_STEP * myECTS.y;
 			break;
 
 		/* If the ECTS is on the middle conveyor */
 		case conveyor_C:
 
 			/* Calculate the pixel position of the ECTS */
-			x = CONVEYOR_C_X_OFFSET + PIXEL_PER_STEP * myECTS.y;
-			y = CONVEYOR_C_Y_OFFSET + PIXEL_PER_STEP * myECTS.x;
+			x = CONVEYOR_C_X_OFFSET + ECTS_PIXEL_PER_STEP * myECTS.y;
+			y = CONVEYOR_C_Y_OFFSET + ECTS_PIXEL_PER_STEP * myECTS.x;
 			break;
 
 		/* If the ECTS is on the right conveyor */
 		case conveyor_R:
 
 			/* Calculate the pixel position of the ECTS */
-			x = CONVEYOR_R_X_OFFSET + PIXEL_PER_STEP * myECTS.x;
-			y = CONVEYOR_R_Y_OFFSET - PIXEL_PER_STEP * myECTS.y;
+			x = CONVEYOR_R_X_OFFSET + ECTS_PIXEL_PER_STEP * myECTS.x;
+			y = CONVEYOR_R_Y_OFFSET - ECTS_PIXEL_PER_STEP * myECTS.y;
 			break;
 
 		/* If the ECTS is lifted by the left roboter */
@@ -237,17 +261,10 @@ static void updateECTS(ects myECTS)
 			break;
 	}
 
-	/* Clear the old position of the ECTS (unless it's 0:0) */
-	if(oldECTS[myECTS.id].x != 0 && oldECTS[myECTS.id].y != 0)
-	{
-		drawECTS(oldECTS[myECTS.id].x, oldECTS[myECTS.id].y, LCD_COLOR_CONVEYOR_GREEN);
-	}
-
 	/* Draw the new position of the ECTS (unless it's 0:0) */
 	if(x != 0 && y != 0)
 	{
 		drawECTS(x, y, LCD_COLOR_ECTS_BLACK);
-		//TODO Print draw msg
 	}
 
 	/* Update the old ECTS position */
@@ -278,7 +295,7 @@ static void updateECTS(ects myECTS)
 *
 * \version 0.0.1
 *
-* \date 31.03.2014 File Created
+* \date 31.03.2014 Function Created
 *
 *******************************************************************************/
 
@@ -311,7 +328,7 @@ static void drawECTS(uint16_t Xpos, uint16_t Ypos, LCDCOLOR Color)
 *
 * \version 0.0.1
 *
-* \date 31.03.2014 File Created
+* \date 31.03.2014 Function Created
 *
 *******************************************************************************/
 
@@ -377,7 +394,7 @@ static void updateConveyorLeft(void)
 *
 * \version 0.0.1
 *
-* \date 31.03.2014 File Created
+* \date 31.03.2014 Function Created
 *
 *******************************************************************************/
 
@@ -446,7 +463,7 @@ static void updateConveyorRight(void)
 *
 * \version 0.0.1
 *
-* \date 31.03.2014 File Created
+* \date 31.03.2014 Function Created
 *
 *******************************************************************************/
 
@@ -493,4 +510,76 @@ static void updateConveyorCenter(void)
 
 /* ****************************************************************************/
 /* End      :  updateConveyorCenter											  */
+/* ****************************************************************************/
+
+
+
+/******************************************************************************/
+/* Function:  uartPrintHandler												  */
+/******************************************************************************/
+/*! \brief Function handle the information to print over uart
+*
+* \return None
+*
+* \author meert1
+*
+* \version 0.0.1
+*
+* \date 26.04.2014 Function Created
+*
+*******************************************************************************/
+
+static void uartPrintHandler(void)
+{
+	/* Variable to hold the switch state */
+	uint8_t switchState = 0;
+
+	/* Char array for the print mesage */
+	char ECTSString[50];
+
+	/* get the switch state */
+	CARME_IO1_SWITCH_Get(&switchState);
+
+	/* Check if the switch S0 is set */
+	if(switchState & 0x01)
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS, LCD_SWITCH_0_ON_TEXT);
+		sprintf(ECTSString, "ECTS 1 Position X:%i Y:%d", (int)ECTS_1.x, (int)ECTS_1.y);
+		createUARTMessage(ECTSString);
+	}
+	else
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS, LCD_SWITCH_0_OFF_TEXT);
+	}
+
+	/* Check if the switch S1 is set */
+	if(switchState & 0x02)
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + LCD_TEXT_OFFSET, LCD_SWITCH_1_ON_TEXT);
+		sprintf(ECTSString, "ECTS 2 Position X:%i Y:%d", (int)ECTS_2.x, (int)ECTS_2.y);
+		createUARTMessage(ECTSString);
+	}
+	else
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + LCD_TEXT_OFFSET, LCD_SWITCH_1_OFF_TEXT);
+	}
+
+	/* Check if the switch S2 is set */
+	if(switchState & 0x04)
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + 2 * LCD_TEXT_OFFSET, LCD_SWITCH_2_ON_TEXT);
+		sprintf(ECTSString, "ECTS 3 Position X:%i Y:%d", (int)ECTS_3.x, (int)ECTS_3.y);
+		createUARTMessage(ECTSString);
+	}
+	else
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + 2 * LCD_TEXT_OFFSET, LCD_SWITCH_2_OFF_TEXT);
+	}
+
+	/* Update the LED's */
+	CARME_IO1_LED_Set(switchState, 0x07);
+}
+
+/* ****************************************************************************/
+/* End      :  uartPrintHandler												  */
 /* ****************************************************************************/
