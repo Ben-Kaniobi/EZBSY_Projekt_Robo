@@ -39,7 +39,7 @@
 #define MSG_START    (0x01)             /* CAN message to start conveyor      */
 #define MSG_FLIP     (0x01)             /* CAN message to move flipper        */
 /* CAN DB values */
-#define DB_SPEED     (0)                /* Speed for the flipper, 5-255, 0 for default */
+#define DB_SPEED     (0x50)             /* Speed for the flipper, 5-255, 0 for default */
 #define DB_POS_L     (150)              /* Left flipper position              */
 #define DB_POS_R     (105)              /* Right flipper position             */
 /* Flipper */

@@ -153,21 +153,21 @@ static void vECTS_updater_task(void *pvData) {
 
 	for(EVER) {
 
-		if(ECTS_1.x >= X_STEP_MAX) {
-			
-			ECTS_1.x = 0;
-		}
-		if(ECTS_2.x >= X_STEP_MAX) {
-			
-			ECTS_2.x = 0;
-		}
-		if(ECTS_3.x >= X_STEP_MAX) {
-			
-			ECTS_3.x = 0;
-		}
-		ECTS_1.x += X_STEP;
-		ECTS_2.x += X_STEP;
-		ECTS_3.x += X_STEP;
+//		if(ECTS_1.x >= X_STEP_MAX) {
+//
+//			ECTS_1.x = 0;
+//		}
+//		if(ECTS_2.x >= X_STEP_MAX) {
+//
+//			ECTS_2.x = 0;
+//		}
+//		if(ECTS_3.x >= X_STEP_MAX) {
+//
+//			ECTS_3.x = 0;
+//		}
+//		ECTS_1.x += X_STEP;
+//		ECTS_2.x += X_STEP;
+//		ECTS_3.x += X_STEP;
 
 		/* Conveyor status request */
 		CAN_buffer[0] = DB_STATUS;
