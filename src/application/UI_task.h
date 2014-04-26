@@ -32,7 +32,7 @@
 
 /* default-task RTOS configuration */
 #define UI_TASK_NAME		"UI Task"						/*!< Name of the task */
-#define UI_STACK_SIZE		configMINIMAL_STACK_SIZE 		/*!< size of the task's stack */
+#define UI_STACK_SIZE		configMINIMAL_STACK_SIZE * 2 		/*!< size of the task's stack */
 #define UI_TASK_PRIORITY	(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
 
 #define LCD_COLOR_CONVEYOR_GREEN	(0x03E0)
@@ -46,13 +46,13 @@
 #define LCD_TEXT_OFFSET			(15)
 
 /* Text definitons on the LCD */
-#define LCD_TITLE_TEXT			("Hello World")
-#define LCD_SWITCH_0_ON_TEXT	("Switch S0 on ")
-#define LCD_SWITCH_0_OFF_TEXT	("Switch S0 off")
-#define LCD_SWITCH_1_ON_TEXT	("Switch S1 on ")
-#define LCD_SWITCH_1_OFF_TEXT	("Switch S1 off")
-#define LCD_SWITCH_2_ON_TEXT	("Switch S2 on ")
-#define LCD_SWITCH_2_OFF_TEXT	("Switch S2 off")
+#define LCD_TITLE_TEXT			("Robot Model")
+#define LCD_SWITCH_0_ON_TEXT	("ECTS 1 status msg on ")
+#define LCD_SWITCH_0_OFF_TEXT	("ECTS 1 status msg off")
+#define LCD_SWITCH_1_ON_TEXT	("ECTS 2 status msg on ")
+#define LCD_SWITCH_1_OFF_TEXT	("ECTS 2 status msg off")
+#define LCD_SWITCH_2_ON_TEXT	("ECTS 3 status msg on ")
+#define LCD_SWITCH_2_OFF_TEXT	("ECTS 3 status msg off")
 
 
 #define CONVEYOR_L_X_OFFSET		(137)
@@ -62,14 +62,15 @@
 #define CONVEYOR_C_X_OFFSET		(160)
 #define CONVEYOR_C_Y_OFFSET		(90)
 
-#define PIXEL_PER_STEP			(2)
+#define PIXEL_PER_STEP			(4)
+#define ECTS_PIXEL_PER_STEP		(2)
 
 #define LINE_LEFT_START			(135)
 #define LINE_LEFT_STOP			(31)
-#define LINE_RIGHT_START		(185)
-#define LINE_RIGHT_STOP			(291)
-#define LINE_CENTER_START		(93)
-#define LINE_CENTER_STOP		(199)
+#define LINE_RIGHT_START		(186)
+#define LINE_RIGHT_STOP			(290)
+#define LINE_CENTER_START		(96)
+#define LINE_CENTER_STOP		(200)
 
 
 /* ------------------------- module type declaration -------------------------*/

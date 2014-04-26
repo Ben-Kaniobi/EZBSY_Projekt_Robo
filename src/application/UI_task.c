@@ -29,12 +29,14 @@
 #include "stm32f4xx.h"			/* uC includes */
 
 /* application */
-#include "UI_task.h"		/* Own header include */
+#include "UI_task.h"			/* Own header include */
 #include "ECTS_updater_task.h"
+#include "UART_task.h"
 
 #include  "inc/lcd.h"		/* Graphic Library */
 #include <ff.h>				/* FatFs */
 #include "carme_io1.h"		/* Carme IO include */
+#include <stdio.h>
 
 
 /* ------------------------- module data declaration -------------------------*/
@@ -45,20 +47,20 @@ ects oldECTS[3];
 
 /* Variables for the left conveyor animation */
 int xLine1Left = 135;
-int xLine2Left = 101;
-int xLine3Left = 65;
+int xLine2Left = 99;
+int xLine3Left = 63;
 int yLinesLeft = 191;
 
 /* Variables for the right conveyor animation */
-int xLine1Right = 185;
-int xLine2Right = 221;
-int xLine3Right = 255;
+int xLine1Right = 186;
+int xLine2Right = 222;
+int xLine3Right = 258;
 int yLinesRight = 191;
 
 /* Variables for the middle conveyor animation */
-int yLine1Center = 93;
-int yLine2Center = 129;
-int yLine3Center = 163;
+int yLine1Center = 96;
+int yLine2Center = 132;
+int yLine3Center = 168;
 int xLinesCenter = 150;
 
 /* ----------------------- module procedure declaration ----------------------*/
@@ -101,13 +103,13 @@ void InitUITask(void)
 	/* init the carme IO's */
 	CARME_IO1_Init();
 
-	/* FatFs mount */
-	if (f_mount(&lcd_fs, "0:", 1) != FR_OK) {
-		//Default_Handler(); //TODO remove if not used
-	}
-
-	/* Draw background of the screen */
-    LCD_BMP_DrawBitmap("Back.bmp", 0, 0);
+//	/* FatFs mount */
+//	if (f_mount(&lcd_fs, "0:", 1) != FR_OK) {
+//		//Default_Handler(); //TODO remove if not used
+//	}
+//
+//	/* Draw background of the screen */
+//    LCD_BMP_DrawBitmap("Back.bmp", 0, 0);
 
     /* Display title*/
     LCD_SetTextColor(GUI_COLOR_BLACK);
@@ -155,7 +157,17 @@ static void vUITask(void* pvParameters )
 
     for(;;)
     {
-    	/* Code here */
+    	int counter;
+
+    	for(counter = 0; counter < 3; counter++)
+    	{
+        	/* Clear the old position of the ECTS (unless it's 0:0) */
+        	if(oldECTS[counter].x != 0 && oldECTS[counter].y != 0)
+        	{
+        		drawECTS(oldECTS[counter].x, oldECTS[counter].y, LCD_COLOR_CONVEYOR_GREEN);
+        	}
+    	}
+
 
     	updateConveyorLeft();
     	updateConveyorRight();
@@ -202,24 +214,24 @@ static void updateECTS(ects myECTS)
 		case conveyor_L:
 
 			/* Calculate the pixel position of the ECTS */
-			x = CONVEYOR_L_X_OFFSET - PIXEL_PER_STEP * myECTS.x;
-			y = CONVEYOR_L_Y_OFFSET + PIXEL_PER_STEP * myECTS.y;
+			x = CONVEYOR_L_X_OFFSET - ECTS_PIXEL_PER_STEP * myECTS.x;
+			y = CONVEYOR_L_Y_OFFSET + ECTS_PIXEL_PER_STEP * myECTS.y;
 			break;
 
 		/* If the ECTS is on the middle conveyor */
 		case conveyor_C:
 
 			/* Calculate the pixel position of the ECTS */
-			x = CONVEYOR_C_X_OFFSET + PIXEL_PER_STEP * myECTS.y;
-			y = CONVEYOR_C_Y_OFFSET + PIXEL_PER_STEP * myECTS.x;
+			x = CONVEYOR_C_X_OFFSET + ECTS_PIXEL_PER_STEP * myECTS.y;
+			y = CONVEYOR_C_Y_OFFSET + ECTS_PIXEL_PER_STEP * myECTS.x;
 			break;
 
 		/* If the ECTS is on the right conveyor */
 		case conveyor_R:
 
 			/* Calculate the pixel position of the ECTS */
-			x = CONVEYOR_R_X_OFFSET + PIXEL_PER_STEP * myECTS.x;
-			y = CONVEYOR_R_Y_OFFSET - PIXEL_PER_STEP * myECTS.y;
+			x = CONVEYOR_R_X_OFFSET + ECTS_PIXEL_PER_STEP * myECTS.x;
+			y = CONVEYOR_R_Y_OFFSET - ECTS_PIXEL_PER_STEP * myECTS.y;
 			break;
 
 		/* If the ECTS is lifted by the left roboter */
@@ -245,17 +257,10 @@ static void updateECTS(ects myECTS)
 			break;
 	}
 
-	/* Clear the old position of the ECTS (unless it's 0:0) */
-	if(oldECTS[myECTS.id].x != 0 && oldECTS[myECTS.id].y != 0)
-	{
-		drawECTS(oldECTS[myECTS.id].x, oldECTS[myECTS.id].y, LCD_COLOR_CONVEYOR_GREEN);
-	}
-
 	/* Draw the new position of the ECTS (unless it's 0:0) */
 	if(x != 0 && y != 0)
 	{
 		drawECTS(x, y, LCD_COLOR_ECTS_BLACK);
-		//TODO Print draw msg
 	}
 
 	/* Update the old ECTS position */
@@ -525,6 +530,9 @@ static void uartPrintHandler(void)
 	/* Variable to hold the switch state */
 	uint8_t switchState = 0;
 
+	/* Char array for the print mesage */
+	char ECTSString[50];
+
 	/* get the switch state */
 	CARME_IO1_SWITCH_Get(&switchState);
 
@@ -532,6 +540,8 @@ static void uartPrintHandler(void)
 	if(switchState & 0x01)
 	{
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS, LCD_SWITCH_0_ON_TEXT);
+		sprintf(ECTSString, "ECTS 1 Position X:%i Y:%d", (int)ECTS_1.x, (int)ECTS_1.y);
+		createUARTMessage(ECTSString);
 	}
 	else
 	{
@@ -542,6 +552,8 @@ static void uartPrintHandler(void)
 	if(switchState & 0x02)
 	{
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + LCD_TEXT_OFFSET, LCD_SWITCH_1_ON_TEXT);
+		sprintf(ECTSString, "ECTS 2 Position X:%i Y:%d", (int)ECTS_2.x, (int)ECTS_2.y);
+		createUARTMessage(ECTSString);
 	}
 	else
 	{
@@ -552,6 +564,8 @@ static void uartPrintHandler(void)
 	if(switchState & 0x04)
 	{
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + 2 * LCD_TEXT_OFFSET, LCD_SWITCH_2_ON_TEXT);
+		sprintf(ECTSString, "ECTS 3 Position X:%i Y:%d", (int)ECTS_3.x, (int)ECTS_3.y);
+		createUARTMessage(ECTSString);
 	}
 	else
 	{

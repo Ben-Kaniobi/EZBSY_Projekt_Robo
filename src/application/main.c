@@ -73,7 +73,7 @@ int  main(void) {
 
     /* module initialisation */
 	btn_initInterrupt();
-	InitLCDTask();
+	InitUITask();
 	InitUARTTask();
 	InitCANGatekeeperTask();
 	InitECTSUpdaterTask();
