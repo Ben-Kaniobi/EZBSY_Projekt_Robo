@@ -33,6 +33,7 @@
 #include "flipper_task.h"
 #include "conveyor_tasks.h"
 #include "init_robot_tasks.h"
+#include "btn.h"
 
 #include  "inc/lcd.h"                          /* Graphic Library                */
 #include <ff.h>
@@ -71,6 +72,7 @@ int  main(void) {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
     /* module initialisation */
+	btn_initInterrupt();
 	InitLCDTask();
 	InitUARTTask();
 	InitCANGatekeeperTask();
@@ -82,6 +84,7 @@ int  main(void) {
 	/*Example for CAN usage*/
 //	setFunctionCANListener((CAN_function_listener_t)CANTest, 0x143);
 //	createCANMessage(0x142, 3, data);
+
 
     vTaskStartScheduler();
 

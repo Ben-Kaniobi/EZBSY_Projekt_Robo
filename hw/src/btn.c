@@ -35,6 +35,8 @@
 #include "carme_io1.h"
 #include "misc.h"
 #include "can.h"
+#include "../src/application/ECTS_updater_task.h"
+#include "../src/application/UART_task.h"
 #include <stdio.h>
 
 #include "FreeRTOS.h"
@@ -43,6 +45,7 @@
 #include "semphr.h"
 
 #include "btn.h"
+#include "stdio.h"
 
 //----- Macros -----------------------------------------------------------------
 
@@ -51,7 +54,7 @@
 //----- Function prototypes ----------------------------------------------------
 
 //----- Data -------------------------------------------------------------------
-
+char ECTSString[20];
 //----- Implementation ---------------------------------------------------------
 
 /*******************************************************************************
@@ -182,8 +185,8 @@ void MyEXTI9_5_IRQHandler(void) {
 
         EXTI_ClearITPendingBit(EXTI_Line7);
 
-    	u8Led ^= 0x01;
-    	CARME_IO1_LED_Set(u8Led, 0x01);
+		sprintf(ECTSString, "ECTS Position X:%d Y:%d", ECTS_1.x, ECTS_1.y);
+		createUARTMessage(ECTSString);
     }
 }
 
