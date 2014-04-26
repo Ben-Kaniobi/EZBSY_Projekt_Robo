@@ -1,5 +1,5 @@
 /******************************************************************************/
-/*! \file lcd_task.c
+/*! \file UI_task.c
 ******************************************************************************
 * \brief File to draw the state of the robo model
 *
@@ -29,11 +29,12 @@
 #include "stm32f4xx.h"			/* uC includes */
 
 /* application */
-#include "lcd_task.h"		/* Own header include */
+#include "UI_task.h"		/* Own header include */
 #include "ECTS_updater_task.h"
 
 #include  "inc/lcd.h"		/* Graphic Library */
 #include <ff.h>				/* FatFs */
+#include "carme_io1.h"		/* Carme IO include */
 
 
 /* ------------------------- module data declaration -------------------------*/
@@ -62,24 +63,25 @@ int xLinesCenter = 150;
 
 /* ----------------------- module procedure declaration ----------------------*/
 
-static void vLCDTask(void*);
+static void vUITask(void*);
 static void updateECTS(ects myECTS);
 static void drawECTS(uint16_t Xpos, uint16_t Ypos, LCDCOLOR Color);
 static void updateConveyorLeft(void);
 static void updateConveyorCenter(void);
 static void updateConveyorRight(void);
+static void uartPrintHandler(void);
 
 
 /* ****************************************************************************/
-/* End Header : lcd_task.c													  */
+/* End Header : UI_task.c													  */
 /* ****************************************************************************/
 
 
 
 /******************************************************************************/
-/* Function:  InitLCDTask													  */
+/* Function:  InitUITask													  */
 /******************************************************************************/
-/*! \brief Init function of the LCD task
+/*! \brief Init function of the UI task
 *
 * \return None
 *
@@ -87,22 +89,25 @@ static void updateConveyorRight(void);
 *
 * \version 0.0.1
 *
-* \date 24.03.2014 File Created
+* \date 24.03.2014 Function Created
 *
 *******************************************************************************/
 
-void InitLCDTask(void)
+void InitUITask(void)
 {
 	/* Init of the LCD */
 	LCD_Init();
 
-//	/* FatFs mount */
-//	if (f_mount(&lcd_fs, "0:", 1) != FR_OK) {
-//		//Default_Handler(); //TODO remove if not used
-//	}
-//
-//	/* Draw background of the screen */
-//    LCD_BMP_DrawBitmap("Back.bmp", 0, 0);
+	/* init the carme IO's */
+	CARME_IO1_Init();
+
+	/* FatFs mount */
+	if (f_mount(&lcd_fs, "0:", 1) != FR_OK) {
+		//Default_Handler(); //TODO remove if not used
+	}
+
+	/* Draw background of the screen */
+    LCD_BMP_DrawBitmap("Back.bmp", 0, 0);
 
     /* Display title*/
     LCD_SetTextColor(GUI_COLOR_BLACK);
@@ -111,19 +116,19 @@ void InitLCDTask(void)
     LCD_DisplayStringCenter(6, "Hello World");
 
     /* create the task */
-    xTaskCreate( vLCDTask, ( signed char * ) LCD_TASK_NAME, LCD_STACK_SIZE, NULL, LCD_TASK_PRIORITY, NULL );
+    xTaskCreate( vUITask, ( signed char * ) UI_TASK_NAME, UI_STACK_SIZE, NULL, UI_TASK_PRIORITY, NULL );
 }
 
 /* ****************************************************************************/
-/* End      :  InitLCDTask													  */
+/* End      :  InitUITask													  */
 /* ****************************************************************************/
 
 
 
 /******************************************************************************/
-/* Function:  vLCDTask														  */
+/* Function:  vUITask														  */
 /******************************************************************************/
-/*! \brief The LCD function itself
+/*! \brief The Ui's function itself
 *
 * \param[in] pvParameters  Pointer for given parameter
 *
@@ -133,11 +138,11 @@ void InitLCDTask(void)
 *
 * \version 0.0.1
 *
-* \date 24.03.2014 File Created
+* \date 24.03.2014 Function Created
 *
 *******************************************************************************/
 
-static void vLCDTask(void* pvParameters )
+static void vUITask(void* pvParameters )
 {
     portTickType xLastFlashTime;
 
@@ -159,12 +164,15 @@ static void vLCDTask(void* pvParameters )
     	updateECTS(ECTS_2);
     	updateECTS(ECTS_3);
 
+    	uartPrintHandler();
+
+
         vTaskDelayUntil( &xLastFlashTime, 200 / portTICK_RATE_MS);
     }
 }
 
 /* ****************************************************************************/
-/* End      :  vLCDTask														  */
+/* End      :  vUITask														  */
 /* ****************************************************************************/
 
 
@@ -278,7 +286,7 @@ static void updateECTS(ects myECTS)
 *
 * \version 0.0.1
 *
-* \date 31.03.2014 File Created
+* \date 31.03.2014 Function Created
 *
 *******************************************************************************/
 
@@ -311,7 +319,7 @@ static void drawECTS(uint16_t Xpos, uint16_t Ypos, LCDCOLOR Color)
 *
 * \version 0.0.1
 *
-* \date 31.03.2014 File Created
+* \date 31.03.2014 Function Created
 *
 *******************************************************************************/
 
@@ -377,7 +385,7 @@ static void updateConveyorLeft(void)
 *
 * \version 0.0.1
 *
-* \date 31.03.2014 File Created
+* \date 31.03.2014 Function Created
 *
 *******************************************************************************/
 
@@ -446,7 +454,7 @@ static void updateConveyorRight(void)
 *
 * \version 0.0.1
 *
-* \date 31.03.2014 File Created
+* \date 31.03.2014 Function Created
 *
 *******************************************************************************/
 
@@ -493,4 +501,67 @@ static void updateConveyorCenter(void)
 
 /* ****************************************************************************/
 /* End      :  updateConveyorCenter											  */
+/* ****************************************************************************/
+
+
+
+/******************************************************************************/
+/* Function:  uartPrintHandler												  */
+/******************************************************************************/
+/*! \brief Function handle the information to print over uart
+*
+* \return None
+*
+* \author meert1
+*
+* \version 0.0.1
+*
+* \date 26.04.2014 Function Created
+*
+*******************************************************************************/
+
+static void uartPrintHandler(void)
+{
+	/* Variable to hold the switch state */
+	uint8_t switchState = 0;
+
+	/* get the switch state */
+	CARME_IO1_SWITCH_Get(&switchState);
+
+	/* Check if the switch S0 is set */
+	if(switchState & 0x01)
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS, LCD_SWITCH_0_ON_TEXT);
+	}
+	else
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS, LCD_SWITCH_0_OFF_TEXT);
+	}
+
+	/* Check if the switch S1 is set */
+	if(switchState & 0x02)
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + LCD_TEXT_OFFSET, LCD_SWITCH_1_ON_TEXT);
+	}
+	else
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + LCD_TEXT_OFFSET, LCD_SWITCH_1_OFF_TEXT);
+	}
+
+	/* Check if the switch S2 is set */
+	if(switchState & 0x04)
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + 2 * LCD_TEXT_OFFSET, LCD_SWITCH_2_ON_TEXT);
+	}
+	else
+	{
+		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + 2 * LCD_TEXT_OFFSET, LCD_SWITCH_2_OFF_TEXT);
+	}
+
+	/* Update the LED's */
+	CARME_IO1_LED_Set(switchState, 0x07);
+}
+
+/* ****************************************************************************/
+/* End      :  uartPrintHandler												  */
 /* ****************************************************************************/
