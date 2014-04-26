@@ -44,8 +44,9 @@
 /* private macro --------------------------------------------------------------*/
 /* Common */
 #define EVER         ;;                 /* For forever loop: for(;;)          */
-#define X_STEP       (1)                /* TODO                               */
+#define CONV_SPEED   (0.0124f)          /* Speed in cm/ms of the conveyor (evaluated) */
 #define TIME_STEP    (200)              /* Time delay in ms for updater task  */
+#define X_STEP       ((CONV_SPEED)*(TIME_STEP)) /* Resulting x step in cm         */
 /* CAN IDs */
 #define GET_STATUS_L (0x110)            /* Status request for left conveyer   */
 #define GET_STATUS_C (0x120)            /* Status request for center conveyer */
@@ -80,6 +81,9 @@
 #define X_STEP_MAX   (47)                /* Max. position in cm for x direction */
 #define X_SENS_LR    (9)                 /* Position in cm for the left/right sensor */
 #define X_SENS_C     (22)                /* Position in cm for the center sensor */
+
+/* macros --------------------------------------------------------------------*/
+#define X_DATA_TO_CM(x) (0.0048f * (x))    /* Convert X data from CAN to cm (0x186A -> 30cm) */
 
 /* data types ----------------------------------------------------------------*/
 
@@ -317,15 +321,15 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 	find_ECTS(ECTS_p, conveyor);
 	if(!ECTS_p) {
 
-		/* ECTS_p hasn't been set before --> no ECTS was on the conveyor but was now detected*/
-		//TODO: Handle
+		/* ECTS_p hasn't been set before --> no ECTS was on the conveyor but was now detected */
+		//TODO: Handle?
 	}
 	else {
 
 		/* Concat the two bytes */
 		uint16_t pos_x = (data[DB_POS_X_h]<<8 & 0xFF00) | (data[DB_POS_X_l] & 0xFF);
 		/* Convert to our format */
-		//pos_x = TODO pos_x;
+		pos_x = X_DATA_TO_CM(pos_x);
 		/* Get mutex for ECTS access */
 		if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
 			/* Finally set the position for the correct ECTS */
@@ -339,8 +343,35 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 
 			/* Concat the two bytes */
 			uint16_t pos_y = (data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
-			/* Convert to our format */
-			//pos_y = TODO pos_y;
+			/* Convert to our format (conveyor width divided in 8 sections/lines) */
+			if(pos_y <= 868) /* between 800 and 868 */ {
+				pos_y = 0;
+			}
+			else if(pos_y <= 1004) {
+				pos_y = 1;
+			}
+			else if(pos_y <= 1139) {
+				pos_y = 2;
+			}
+			else if(pos_y <= 1275) {
+				pos_y = 3;
+			}
+			else if(pos_y <= 1411) {
+				pos_y = 4;
+			}
+			else if(pos_y <= 1546) {
+				pos_y = 5;
+			}
+			else if(pos_y <= 1682) {
+				pos_y = 6;
+			}
+			else /* -> pos_y <= 1750 */ {
+				pos_y = 7;
+			}
+			/* Reverse order if it's left conveyor, because the light barrier is the other way around */
+			if(conveyor == conveyor_L) {
+				pos_y = 7-pos_y;
+			}
 			/* Finally set the position for the correct ECTS */
 			/* Get mutex for ECTS access */
 			if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
@@ -484,7 +515,7 @@ void find_ECTS(ects *ECTS_p, z_pos _z_pos) {
 				/* ECTS_p has been set before, compare x values */
 				if(ECTS_2.x > ECTS_p->x) {
 
-					//TODO: Handle 2>p aber 2 schon hinter Schranke
+					//TODO: Handle ECTS_2 already behind light barrier
 
 					/* ECTS_2 is further, use this */
 					ECTS_p = &ECTS_2;

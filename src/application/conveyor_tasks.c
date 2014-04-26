@@ -33,8 +33,7 @@
 /* ----------------------- private constant declaration ----------------------*/
 /* Common */
 #define EVER         ;;                 /* For forever loop: for(;;)          */
-#define CONVEYOR_STOP_POS_H (0)         /* TODO: High byte of stop position   */
-#define CONVEYOR_STOP_POS_L (0)         /* TODO: Low byte of stop position    */
+#define CONVEYOR_STOP_X (16)            /* Stop x position in cm              */
 /* CAN IDs */
 #define GET_STATUS_L (0x110)            /* Status request for left conveyer   */
 #define GET_STATUS_C (0x120)            /* Status request for center conveyer */
@@ -65,6 +64,9 @@
 #define DB_POS_X_l   (4)
 #define DB_POS_Y_h   (5)
 #define DB_POS_Y_l   (6)
+
+/* macros --------------------------------------------------------------------*/
+#define CM_TO_X_DATA(x) (1.0f / 0.0048f * (x))    /* Convert X data from CAN to cm (30cm -> 0x186A) */
 
 /* ------------------------- module data declaration -------------------------*/
 xSemaphoreHandle xSemaphoreLeftECTS = NULL;
@@ -131,8 +133,8 @@ static void vConveyorL_task(void* pvParameters )
 
 			/* Send "stop the conveyor at position" message */
 			CAN_buffer[0] = MSG_STOP;
-			CAN_buffer[1] = CONVEYOR_STOP_POS_H;
-			CAN_buffer[2] = CONVEYOR_STOP_POS_L;
+			CAN_buffer[1] = ((uint8_t)CM_TO_X_DATA(CONVEYOR_STOP_X) >> 8) & 0xFF;  /* High byte */
+			CAN_buffer[2] = ((uint8_t)CM_TO_X_DATA(CONVEYOR_STOP_X)) & 0xFF;  /* Low byte */
 			createCANMessage(CMD_L, 3, CAN_buffer);
 
 			/* Start the conveyor */
@@ -146,6 +148,11 @@ static void vConveyorL_task(void* pvParameters )
 
 				vTaskDelay(50 / portTICK_RATE_MS);
 			}
+
+			/* Send finish command */
+			CAN_buffer[0] = MSG_DONE;
+			CAN_buffer[1] = 0;
+			createCANMessage(CMD_L, 2, CAN_buffer);
 
 			/* Conveyor stopped, give ECTS semaphore */
 			xSemaphoreGive(xSemaphoreLeftECTS);
@@ -191,8 +198,8 @@ static void vConveyorR_task(void* pvParameters )
 
 			/* Send "stop the conveyor at position" message */
 			CAN_buffer[0] = MSG_STOP;
-			CAN_buffer[1] = CONVEYOR_STOP_POS_H;
-			CAN_buffer[2] = CONVEYOR_STOP_POS_L;
+			CAN_buffer[1] = ((uint8_t)CM_TO_X_DATA(CONVEYOR_STOP_X) >> 8) & 0xFF;  /* High byte */
+			CAN_buffer[2] = ((uint8_t)CM_TO_X_DATA(CONVEYOR_STOP_X)) & 0xFF;  /* Low byte */
 			createCANMessage(CMD_R, 3, CAN_buffer);
 
 			/* Start the conveyor */
@@ -206,6 +213,11 @@ static void vConveyorR_task(void* pvParameters )
 
 				vTaskDelay(50 / portTICK_RATE_MS);
 			}
+
+			/* Send finish command */
+			CAN_buffer[0] = MSG_DONE;
+			CAN_buffer[1] = 0;
+			createCANMessage(CMD_R, 2, CAN_buffer);
 
 			/* Conveyor stopped, give ECTS semaphore */
 			xSemaphoreGive(xSemaphoreRightECTS);

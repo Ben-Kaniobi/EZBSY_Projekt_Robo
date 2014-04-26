@@ -43,7 +43,7 @@
 #define DB_POS_L     (150)              /* Left flipper position              */
 #define DB_POS_R     (105)              /* Right flipper position             */
 /* Flipper */
-#define FLIPPER_X_MIN (2000)//TODO            /* Min. x pos. for ECTS to be in flipper area */
+#define FLIPPER_X_MIN (37)              /* Min. x pos. in cm for ECTS to be in flipper area */
 
 /* ------------------------- module data declaration -------------------------*/
 uint8_t CAN_buffer[8];
