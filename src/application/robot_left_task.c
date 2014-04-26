@@ -119,7 +119,7 @@ void vRobotLeftTask( void *pvParameters )
 
 
     	/* Wait for an ECTS that can be taken */
-//        xSemaphoreTake( xSemaphoreLeftECTS, portMAX_DELAY );
+        xSemaphoreTake( xSemaphoreLeftECTS, portMAX_DELAY );
 
 
         /* Check which ECTS to handle */
@@ -130,8 +130,8 @@ void vRobotLeftTask( void *pvParameters )
         uint8_t xEctsGrabPosition[ 8 ] = { 0x02, 0x80, 0xA0, 0xD5, 0x70, 0x87, 0x00, 0x00 };
 
         /* Choose which position the ECTS actually has and adjust grab gesture accordingly */
-//        switch( ECTS->y )
-        switch( 0 )
+        switch( ECTS->y )
+//        switch( 0 )
         {
         	case 0:
         		xEctsGrabPosition[2] = 0x9A;
