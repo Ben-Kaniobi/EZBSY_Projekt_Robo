@@ -31,12 +31,12 @@
 /* ----------------------- module constant declaration -----------------------*/
 
 /* Robot left task RTOS configuration */
-#define ROBOT_LEFT_TASK_NAME		"Robot Left Task"				/*!< Name of the task */
+#define ROBOT_LEFT_TASK_NAME		"LeftRobot"						/*!< Name of the task */
 #define ROBOT_LEFT_STACK_SIZE		configMINIMAL_STACK_SIZE 		/*!< size of the task's stack */
 #define ROBOT_LEFT_TASK_PRIORITY	(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
 
 /* Robot right task RTOS configuration */
-#define ROBOT_RIGHT_TASK_NAME		"Robot Right Task"				/*!< Name of the task */
+#define ROBOT_RIGHT_TASK_NAME		"RightRobot"					/*!< Name of the task */
 #define ROBOT_RIGHT_STACK_SIZE		configMINIMAL_STACK_SIZE 		/*!< size of the task's stack */
 #define ROBOT_RIGHT_TASK_PRIORITY	(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
 
@@ -49,6 +49,7 @@
 /* ------------------------- module type declaration -------------------------*/
 enum robotPosition
 {
+	WaitingPosition,
 	PrepareToTakeEcts,
 	LiftEctsUp,
 	RotateToUnloadTray,

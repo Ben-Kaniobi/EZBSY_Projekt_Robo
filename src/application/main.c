@@ -77,7 +77,7 @@ int  main(void) {
 	InitECTSUpdaterTask();
 	InitFlipperTask();
 	InitConveyorTasks();
-	//InitRobotTasks();
+	InitRobotTasks();
 
 	/*Example for CAN usage*/
 	setFunctionCANListener((CAN_function_listener_t)CANTest, 0x143);
