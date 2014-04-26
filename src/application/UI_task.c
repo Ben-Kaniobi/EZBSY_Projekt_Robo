@@ -168,6 +168,10 @@ static void vUITask(void* pvParameters )
         	}
     	}
 
+//    	/* Test ECTS for positioning */
+//    	ects TestECTS_1 = {0, 0, 7, conveyor_L};
+//    	ects TestECTS_2 = {1, 0, 7, conveyor_C};
+//    	ects TestECTS_3 = {2, 0, 7, conveyor_R};
 
     	updateConveyorLeft();
     	updateConveyorRight();

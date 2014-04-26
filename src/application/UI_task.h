@@ -56,14 +56,14 @@
 
 
 #define CONVEYOR_L_X_OFFSET		(137)
-#define CONVEYOR_L_Y_OFFSET		(200)
-#define CONVEYOR_R_X_OFFSET		(184)
-#define CONVEYOR_R_Y_OFFSET		(200)
-#define CONVEYOR_C_X_OFFSET		(160)
-#define CONVEYOR_C_Y_OFFSET		(90)
+#define CONVEYOR_L_Y_OFFSET		(192)
+#define CONVEYOR_R_X_OFFSET		(183)
+#define CONVEYOR_R_Y_OFFSET		(210)
+#define CONVEYOR_C_X_OFFSET		(152)
+#define CONVEYOR_C_Y_OFFSET		(91)
 
 #define PIXEL_PER_STEP			(4)
-#define ECTS_PIXEL_PER_STEP		(2)
+#define ECTS_PIXEL_PER_STEP		(2.5f)
 
 #define LINE_LEFT_START			(135)
 #define LINE_LEFT_STOP			(31)
