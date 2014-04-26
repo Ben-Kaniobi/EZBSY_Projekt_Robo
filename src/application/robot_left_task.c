@@ -63,6 +63,8 @@ uint8_t payloadLeft[ ][ 8 ] =
 };
 
 
+uint8_t test = 0;
+
 /* ----------------------- module procedure declaration ----------------------*/
 
 
@@ -127,10 +129,12 @@ void vRobotLeftTask( void *pvParameters )
 
         /* Check which ECTS to handle */
         ects *ECTS = NULL;
-        find_ECTS(ECTS, conveyor_L);
+        find_ECTS(&ECTS, conveyor_L);
 
         /* Initialize standard grab gesture */
         uint8_t xEctsGrabPosition[ 8 ] = { 0x02, 0x80, 0xA0, 0xD5, 0x70, 0x87, 0x00, 0x00 };
+
+        test = ECTS->y;
 
         /* Choose which position the ECTS actually has and adjust grab gesture accordingly */
         switch( ECTS->y )
@@ -200,7 +204,8 @@ void vRobotLeftTask( void *pvParameters )
     	createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, xEctsGrabPosition );
 
     	/* Update ECTS position */
-    	update_ECTS_z( robo_L );
+    	ECTS->z = robo_L;
+		ECTS->x = 0;
 
         vTaskDelay( 800 / portTICK_RATE_MS );
 
@@ -235,7 +240,8 @@ void vRobotLeftTask( void *pvParameters )
 		    vTaskDelay( 600 / portTICK_RATE_MS );
 
 		    /* Update ECTS location */
-		    update_ECTS_z( conveyor_C );
+		    ECTS->z = conveyor_C;
+			ECTS->x = 0;
 
 			/* Remove robot arm from the drop off tray by rotating back to the conveyor */
 			createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ RotateToConveyor ] );

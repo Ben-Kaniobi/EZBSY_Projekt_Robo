@@ -58,8 +58,7 @@ extern conveyorState conveyor_R_state;
 
 /* exported function prototypes ----------------------------------------------*/
 extern void InitECTSUpdaterTask(void);
-extern void find_ECTS(ects *ECTS_p, z_pos _z_pos);
-extern void update_ECTS_z(z_pos new_z);
+extern void find_ECTS(ects **ECTS_p, z_pos _z_pos);
 
 #endif /* __APP_ECTS_UPDATER_TASK_H_ */
 

@@ -93,12 +93,12 @@ void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message);
 void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message);
 void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message);
 void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]);
-void find_ECTS(ects *ECTS_p, z_pos conveyor);
+void find_ECTS(ects **ECTS_p, z_pos conveyor);
 
 /* data ----------------------------------------------------------------------*/
-ects ECTS_1 = {0, 0, 4, conveyor_C};
-ects ECTS_2 = {1, 0, 4, conveyor_C};
-ects ECTS_3 = {2, 0, 4, conveyor_C};
+ects ECTS_1 = {0, 0, 1, conveyor_R};
+ects ECTS_2 = {1, 0, 2, conveyor_C};
+ects ECTS_3 = {2, 0, 3, conveyor_L};
 conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;
@@ -322,8 +322,8 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 	}
 
 	ects *ECTS_p = NULL;
-	find_ECTS(ECTS_p, conveyor);
-	if(!ECTS_p) {
+	find_ECTS(&ECTS_p, conveyor);
+	if(ECTS_p == NULL) {
 
 		/* ECTS_p hasn't been set before --> no ECTS was on the conveyor but was now detected */
 		//TODO: Handle?
@@ -357,129 +357,53 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 			xSemaphoreGive(xMutexEditECTS);
 		}
 
-//		/* If theres data for the y position available, update this too */
-//		if(data[DB_ECTS_INFO] == 3) {
-//
-//			/* Concat the two bytes */
-//			uint16_t pos_y = ((uint16_t)data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
-//			/* Convert to our format (conveyor width divided in 8 sections/lines) */
-//			if(pos_y <= 868) /* between 800 and 868 */ {
-//				pos_y = 0;
-//			}
-//			else if(pos_y <= 1004) {
-//				pos_y = 1;
-//			}
-//			else if(pos_y <= 1139) {
-//				pos_y = 2;
-//			}
-//			else if(pos_y <= 1275) {
-//				pos_y = 3;
-//			}
-//			else if(pos_y <= 1411) {
-//				pos_y = 4;
-//			}
-//			else if(pos_y <= 1546) {
-//				pos_y = 5;
-//			}
-//			else if(pos_y <= 1682) {
-//				pos_y = 6;
-//			}
-//			else /* -> pos_y <= 1750 */ {
-//				pos_y = 7;
-//			}
-//			/* Reverse order if it's left conveyor, because the light barrier is the other way around */
-//			if(conveyor == conveyor_L) {
-//				pos_y = 7-pos_y;
-//			}
-//			/* Finally set the position for the correct ECTS */
-//			/* Get mutex for ECTS access */
-//			if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
-//				/* Finally set the position for the correct ECTS */
-//				ECTS_p->y = pos_y;
-//				/* Release mutex */
-//				xSemaphoreGive(xMutexEditECTS);
-//			}
-//		}
+		/* If theres data for the y position available, update this too */
+		if(data[DB_ECTS_INFO] == 3) {
+
+			/* Concat the two bytes */
+			uint16_t pos_y = ((uint16_t)data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
+			/* Convert to our format (conveyor width divided in 8 sections/lines) */
+			if(pos_y <= 868) /* between 800 and 868 */ {
+				pos_y = 0;
+			}
+			else if(pos_y <= 1004) {
+				pos_y = 1;
+			}
+			else if(pos_y <= 1139) {
+				pos_y = 2;
+			}
+			else if(pos_y <= 1275) {
+				pos_y = 3;
+			}
+			else if(pos_y <= 1411) {
+				pos_y = 4;
+			}
+			else if(pos_y <= 1546) {
+				pos_y = 5;
+			}
+			else if(pos_y <= 1682) {
+				pos_y = 6;
+			}
+			else /* -> pos_y <= 1750 */ {
+				pos_y = 7;
+			}
+			/* Reverse order if it's left conveyor, because the light barrier is the other way around */
+			if(conveyor == conveyor_L) {
+				pos_y = 7-pos_y;
+			}
+			/* Finally set the position for the correct ECTS */
+			/* Get mutex for ECTS access */
+			if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
+				/* Finally set the position for the correct ECTS */
+				ECTS_p->y = pos_y;
+				/* Release mutex */
+				xSemaphoreGive(xMutexEditECTS);
+			}
+		}
 	}
 }
 /* ****************************************************************************/
 /* End      :  CAN_conveyor_status_response                                   */
-/* ****************************************************************************/
-
-/******************************************************************************/
-/* Function :  update_ECTS_z                                                   */
-/******************************************************************************/
-/*! \brief Finds the correct ECTS and updates the positions for an ECTS that
-*          changes to a new z position (e.g. conveyor to robo)
-*
-* \note Changing the z position is done with a mutex, so you don't have to
-*       worry about that.
-*
-* \param[in] new_z The new position for the ECTS
-*
-* \return None
-*
-* \author kasen1
-*
-* \version 0.0.1
-*
-* \date 12.03.2014 Created
-*
-*******************************************************************************/
-void update_ECTS_z(z_pos new_z) {
-
-	ects *ECTS_p = NULL;
-
-	switch(new_z) {
-
-	/* New conveyor is center, check robos */
-	case conveyor_C:
-		/* Check robo_L first (TODO: decide which first?) */
-		find_ECTS(ECTS_p, robo_L);
-		if(!ECTS_p) {
-			/* No ECTS was in robo_L, check robo_R */
-			find_ECTS(ECTS_p, robo_R);
-		}
-		break;
-
-	/* New conveyor is left or right, check center conveyor */
-	case conveyor_L: /* Fall through */
-	case conveyor_R:
-		find_ECTS(ECTS_p, conveyor_C);
-		break;
-
-	/* New robo is left, check left conveyor */
-	case robo_L:
-		find_ECTS(ECTS_p, conveyor_L);
-		break;
-
-	/* New robo is right, check right conveyor */
-	case robo_R:
-		find_ECTS(ECTS_p, conveyor_R);
-		break;
-	}
-
-	/* Only update if an ECTS was found */
-	if(!ECTS_p) {
-		/* Get mutex for ECTS access */
-		if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
-			/* Update */
-			if(new_z != conveyor_C) {
-				ECTS_p->x = 0;
-			}
-			else
-			{
-				ECTS_p->x = 6;
-			}
-			ECTS_p->y = 0;
-			ECTS_p->z = new_z;
-			/* Release mutex */
-			xSemaphoreGive(xMutexEditECTS);
-		}
-	}
-}
-/* ****************************************************************************/
-/* End      :  update_ECTS_z                                                  */
 /* ****************************************************************************/
 
 /******************************************************************************/
@@ -499,9 +423,11 @@ void update_ECTS_z(z_pos new_z) {
 * \date 12.03.2014 Created
 *
 *******************************************************************************/
-void find_ECTS(ects *ECTS_p, z_pos _z_pos) {
+void find_ECTS(ects **ECTS_p, z_pos _z_pos) {
 
-	ECTS_p = NULL;
+	ects *ectsTemp[3] = {0, 0, 0};
+
+	int k = 0;
 
 	switch(_z_pos) {
 	case robo_L: /* Fall through */
@@ -509,63 +435,96 @@ void find_ECTS(ects *ECTS_p, z_pos _z_pos) {
 		/* Find the ECTS in this robo */
 		if(ECTS_1.z == _z_pos) {
 			/* Use ECTS_1 */
-			ECTS_p = &ECTS_1;
+			*ECTS_p = &ECTS_1;
 		}
 		else if(ECTS_2.z == _z_pos) {
 			/* Use ECTS_2 */
-			ECTS_p = &ECTS_2;
+			*ECTS_p = &ECTS_2;
 		}
 		else if(ECTS_3.z == _z_pos) {
 			/* Use ECTS_3 */
-			ECTS_p = &ECTS_3;
+			*ECTS_p = &ECTS_3;
 		}
 		break;
 
 	case conveyor_L: /* Fall through */
 	case conveyor_R: /* Fall through */
 	case conveyor_C:
-		/* Find the last ECTS on this conveyor */
+
+		/* Find last ECTS */
 		if(ECTS_1.z == _z_pos) {
-
-			/* Use ECTS_1 */
-			ECTS_p = &ECTS_1;
+			ectsTemp[k++] = &ECTS_1;
 		}
+
 		if(ECTS_2.z == _z_pos) {
-
-			if(!ECTS_p) {
-
-				/* ECTS_p hasn't been set before, set it now */
-				ECTS_p = &ECTS_2;
-			}
-			else {
-
-				/* ECTS_p has been set before, compare x values */
-				if(ECTS_2.x > ECTS_p->x) {
-
-					//TODO: Handle ECTS_2 already behind light barrier
-
-					/* ECTS_2 is further, use this */
-					ECTS_p = &ECTS_2;
-				}
-			}
+			ectsTemp[k++] = &ECTS_2;
 		}
+
 		if(ECTS_3.z == _z_pos) {
+			ectsTemp[k++] = &ECTS_3;
+		}
 
-			if(!ECTS_p) {
+		if(k == 3) {
+		 if(ectsTemp[2]->x > ectsTemp[1]->x) {
+			 ectsTemp[1] = ectsTemp[2];
+		 }
+		}
 
-				/* ECTS_p hasn't been set before, set it now */
-				ECTS_p = &ECTS_3;
-			}
-			else {
 
-				/* ECTS_p has been set before, compare x values */
-				if(ECTS_3.x > ECTS_p->x) {
-
-					/* ECTS_3 is further, use this */
-					ECTS_p = &ECTS_3;
-				}
+		if(k >= 2) {
+			if(ectsTemp[1]->x > ectsTemp[0]->x) {
+				ectsTemp[0] = ectsTemp[1];
 			}
 		}
+
+		*ECTS_p = ectsTemp[0];
+
+//OLD:
+//		/* Find the last ECTS on this conveyor */
+//		*ECTS_p = NULL;
+//
+//		if(ECTS_1.z == _z_pos) {
+//
+//			/* Use ECTS_1 */
+//			*ECTS_p = &ECTS_1;
+//		}
+//		if(ECTS_2.z == _z_pos) {
+//
+//			if(*ECTS_p == NULL) {
+//
+//				/* ECTS_p hasn't been set before, set it now */
+//				*ECTS_p = &ECTS_2;
+//			}
+//			else {
+//
+//				/* ECTS_p has been set before, compare x values */
+//				if(ECTS_2.x > (*ECTS_p)->x ) {
+//
+//					//TODO: Handle ECTS_2 already behind light barrier
+//
+//					/* ECTS_2 is further, use this */
+//					*ECTS_p = &ECTS_2;
+//				}
+//			}
+//		}
+//		if(ECTS_3.z == _z_pos) {
+//
+//			if(*ECTS_p == NULL) {
+//
+//				/* ECTS_p hasn't been set before, set it now */
+//				*ECTS_p = &ECTS_3;
+//			}
+//			else {
+//
+//				/* ECTS_p has been set before, compare x values */
+//				if(ECTS_3.x > (*(*ECTS_p)).x ) {
+//
+//					/* ECTS_3 is further, use this */
+//					*ECTS_p = &ECTS_3;
+//				}
+//			}
+//		}
+
 		break;
 	}
 }
