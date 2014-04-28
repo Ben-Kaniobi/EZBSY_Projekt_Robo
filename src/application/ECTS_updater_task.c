@@ -44,7 +44,7 @@
 /* private macro --------------------------------------------------------------*/
 /* Common */
 #define EVER         ;;                 /* For forever loop: for(;;)          */
-#define CONV_SPEED   (0.0124f)          /* Speed in cm/ms of the conveyor (evaluated) */
+#define CONV_SPEED   (0.01f)          /* Speed in cm/ms of the conveyor (evaluated) */
 #define TIME_STEP    (200)              /* Time delay in ms for updater task  */
 #define X_STEP       ((CONV_SPEED)*(TIME_STEP)) /* Resulting x step in cm         */
 /* CAN IDs */

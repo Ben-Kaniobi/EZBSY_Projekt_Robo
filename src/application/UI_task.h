@@ -63,7 +63,7 @@
 #define CONVEYOR_C_Y_OFFSET		(91)
 
 #define PIXEL_PER_STEP			(4)
-#define ECTS_PIXEL_PER_STEP		(2.5f)
+#define ECTS_PIXEL_PER_STEP		(2)
 
 #define LINE_LEFT_START			(135)
 #define LINE_LEFT_STOP			(31)
