@@ -15,6 +15,9 @@
 *
 * \history 24.03.2014 File Created
 *
+*
+* \ingroup application
+*
 */
 /* ****************************************************************************/
 /* EZBSY Project Robo														  */

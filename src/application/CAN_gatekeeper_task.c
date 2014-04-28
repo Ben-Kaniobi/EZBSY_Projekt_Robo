@@ -3,7 +3,7 @@
 ******************************************************************************
 * \brief Manages the CAN communication
 *
-* Procedures : 	createCANMessage(uint16_, uint8_t, uint8_t)
+* Procedures : 	createCANMessage(uint16_t id, uint8_t dlc, uint8_t data[8])
 * 				InitCANGatekeeperTask(void)
 * 				setFunctionCANListener(CAN_function_listener_t, uint16_t)
 * 				can_init(void)
@@ -17,6 +17,8 @@
 *
 * \history 24.03.2014 File Created
 *
+*
+* \ingroup application
 *
 */
 /* ****************************************************************************/

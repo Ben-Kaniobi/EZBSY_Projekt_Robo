@@ -5,14 +5,19 @@
 *
 * Function : Manages the UART communication
 *
-* Procedures : 	createUARTMessage(void*)
+* Procedures : 	uart_init()
+* 				vUARTTx(void*)
 * 				InitUARTTask()
+* 				createUARTMessage(char data[])
 *
 * \author heimg1
 *
 * \version 0.0.1
 *
 * \history 07.04.2014 File Created
+*
+*
+* \ingroup application
 *
 */
 /* ****************************************************************************/
