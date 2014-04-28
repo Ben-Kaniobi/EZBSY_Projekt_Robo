@@ -6,8 +6,8 @@
 * Function : This file draws the position of the ECTS on the display,
 * animate the conveyors and shows the status of the switches used for UART msg's
 *
-* Procedures : 	vLCDTask(void*)
-* 				InitLCDTask()
+* Procedures : 	vUITask(void*)
+* 				InitUITask()
 *              	updateECTS()
 *              	drawECTS()
 *              	updateConveyorLeft()

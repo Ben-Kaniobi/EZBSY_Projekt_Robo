@@ -8,7 +8,7 @@
 * Function : his file draws the position of the ECTS on the display,
 * animate the conveyors and shows the status of the switches used for UART msg's
 *
-* Procedures : InitLCDTask()
+* Procedures : InitUITask()
 *
 * \author meert1
 *
