@@ -3,22 +3,19 @@
 /******************************************************************************/
 /*! \file robot_right_task.h
 ******************************************************************************
-* \brief Short description of the files function
+* \brief Task that controls the right robot arm
 *
-* Function : More detailed description of the files function
+* Function : This task controls one robot arm and it's interaction with the
+* environment. It avoids collisions between the other robot.
 *
-* Procedures : InitRobotRightTask()
+* Procedures : vRobotRightTask( void *pvParameters )
 *
 * \author plats1
 *
-* \version 0.0.1
+* \version 1.0.0
 *
-* \history 07.04.2014 File Created
+* \history 28.04.2014 File Created
 *
-*
-* \ingroup <group name> [<group name 2> <group name 3>]
-*
-* \todo If u have some todo's for the h-file, add it here
 *
 */
 /* ****************************************************************************/
@@ -29,7 +26,7 @@
 
 
 /* ----------------------- module constant declaration -----------------------*/
-#define SEMAPHORE_TAKE_DELAY		( 1000 )
+
 
 /* ------------------------- module type declaration -------------------------*/
 

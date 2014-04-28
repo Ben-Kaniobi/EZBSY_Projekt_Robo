@@ -3,11 +3,11 @@
 /******************************************************************************/
 /*! \file CAN_gatekeeper_task.h
 ******************************************************************************
-* \brief Short description of the files function
+* \brief header for the CAN gatekeeper
 *
-* Function : More detailed description of the files function
-*
-* Procedures : InitCANGatekeeperTask()
+* Procedures : 	InitCANGatekeeperTask()
+* 				createCANMessage(uint16_t, uint8_t, uint8_t *);
+* 				setFunctionCANListener(CAN_function_listener_t, uint16_t);
 *
 * \author heimg1
 *
@@ -17,7 +17,7 @@
 *
 */
 /* ****************************************************************************/
-/* Project name																  */
+/* EZBSY Project Robo														  */
 /* ****************************************************************************/
 
 /* --------------------------------- imports ---------------------------------*/
@@ -40,7 +40,7 @@
 typedef void (*CAN_function_listener_t) (CARME_CAN_MESSAGE*);
 
 
-/* type for listener-database*/
+/* struct for listener-database*/
 typedef struct
 {
     uint16_t id; /*!< id of the CAN-message */

@@ -3,13 +3,19 @@
 ******************************************************************************
 * \brief File to draw the state of the robo model
 *
-* Function : More detailed description of the files function
+* Function : This file draws the position of the ECTS on the display,
+* animate the conveyors and shows the status of the switches used for UART msg's
 *
-* Procedures : 	vLCDTask(void*)
-* 				InitLCDTask()
-*              	function3()...
+* Procedures : 	vUITask(void*)
+* 				InitUITask()
+*              	updateECTS()
+*              	drawECTS()
+*              	updateConveyorLeft()
+*              	updateConveyorCenter()
+*              	updateConveyorRight()
+*              	uartPrintHandler()
 *
-* \author Name
+* \author meert1
 *
 * \version 0.0.1
 *
@@ -30,20 +36,63 @@
 
 /* application */
 #include "UI_task.h"			/* Own header include */
-#include "ECTS_updater_task.h"
-#include "UART_task.h"
+#include "ECTS_updater_task.h"	/* Include the ECTS */
+#include "UART_task.h"			/* Include the UART task for msg printing */
 
-#include  "inc/lcd.h"		/* Graphic Library */
-#include <ff.h>				/* FatFs */
-#include "carme_io1.h"		/* Carme IO include */
-#include <stdio.h>
+#include  "inc/lcd.h"			/* Graphic Library */
+#include <ff.h>					/* FatFs */
+#include "carme_io1.h"			/* Carme IO include */
+#include <stdio.h>				/* Include with sprintf */
+
+
+/* ----------------------- module constant declaration -----------------------*/
+
+/* Colors used for drawings: */
+#define LCD_COLOR_CONVEYOR_GREEN	(0x03E0)	/* Color of the conveyors */
+#define LCD_COLOR_LINE_GREEN		(0x05E0)	/* Color of the lines for the animation */
+#define LCD_COLOR_ECTS_BLACK		(0x0000)	/* Color of the ECTS */
+
+/* Positions for the text on the LCD: */
+#define LCD_TITLE_Y_POS			(6)		/* Y position of the title  */
+#define LCD_TEXT_X_POS			(10)	/* X position of the text on top of the LCD */
+#define LCD_TEXT_Y_POS			(24)	/* Y position of the text on top of the LCD */
+#define LCD_TEXT_OFFSET			(15)	/* Offset in pixel between the text lines */
+
+/* Text definitons on the LCD: */
+#define LCD_TITLE_TEXT			("Robot Model")
+#define LCD_SWITCH_0_ON_TEXT	("ECTS 1 status msg on ")
+#define LCD_SWITCH_0_OFF_TEXT	("ECTS 1 status msg off")
+#define LCD_SWITCH_1_ON_TEXT	("ECTS 2 status msg on ")
+#define LCD_SWITCH_1_OFF_TEXT	("ECTS 2 status msg off")
+#define LCD_SWITCH_2_ON_TEXT	("ECTS 3 status msg on ")
+#define LCD_SWITCH_2_OFF_TEXT	("ECTS 3 status msg off")
+
+/* Offsets used to draw the ECTS on the conveyors */
+#define CONVEYOR_L_X_OFFSET		(137)
+#define CONVEYOR_L_Y_OFFSET		(192)
+#define CONVEYOR_R_X_OFFSET		(183)
+#define CONVEYOR_R_Y_OFFSET		(210)
+#define CONVEYOR_C_X_OFFSET		(152)
+#define CONVEYOR_C_Y_OFFSET		(91)
+
+/* Defines for the drawing: */
+#define PIXEL_PER_STEP			(4)		/* Number of pixels per update setp of the conveyor lines */
+#define ECTS_PIXEL_PER_STEP		(2)		/* Factor to calculate the pos of an ECTS on the conveyor graphic */
+
+/* Defines for the animation of the conveyors */
+#define LINE_LEFT_START			(135)	/* Start position of the lines on the left conveyor */
+#define LINE_LEFT_STOP			(31)	/* End position of the lines on the left conveyor */
+#define LINE_RIGHT_START		(186)	/* Start position of the lines on the right conveyor */
+#define LINE_RIGHT_STOP			(290)	/* End position of the lines on the right conveyor */
+#define LINE_CENTER_START		(96)	/* Start position of the lines on the center conveyor */
+#define LINE_CENTER_STOP		(200)	/* End position of the lines on the center conveyor */
 
 
 /* ------------------------- module data declaration -------------------------*/
 
 FATFS lcd_fs;		/*!< FatFs variable */
 
-ects oldECTS[3];
+ects oldECTS[3];	/*!< Array of 3 ECTS-structs to save the last drawn position */
 
 /* Variables for the left conveyor animation */
 int xLine1Left = 135;
@@ -157,7 +206,9 @@ static void vUITask(void* pvParameters )
 
     for(;;)
     {
+    	/* Counter variable for the for control structure */
     	int counter;
+
 
     	for(counter = 0; counter < 3; counter++)
     	{
@@ -173,6 +224,7 @@ static void vUITask(void* pvParameters )
 //    	ects TestECTS_2 = {1, 0, 7, conveyor_C};
 //    	ects TestECTS_3 = {2, 0, 7, conveyor_R};
 
+    	/* Update the screen */
     	updateConveyorLeft();
     	updateConveyorRight();
     	updateConveyorCenter();
@@ -180,9 +232,10 @@ static void vUITask(void* pvParameters )
     	updateECTS(ECTS_2);
     	updateECTS(ECTS_3);
 
+    	/* runthe UART print handler */
     	uartPrintHandler();
 
-
+    	/* Wait for 200 ms */
         vTaskDelayUntil( &xLastFlashTime, 200 / portTICK_RATE_MS);
     }
 }
@@ -334,11 +387,15 @@ static void drawECTS(uint16_t Xpos, uint16_t Ypos, LCDCOLOR Color)
 
 static void updateConveyorLeft(void)
 {
-
+	/* Set the running flag manual for demonstration*/
 	int running = 1;
 
+	/* If the conveyor is running */
 	if(running)
 	{
+		/* Animation of the conveyor: */
+
+		/* Update the first line of the animation */
     	if(xLine1Left <= LINE_LEFT_STOP )
     	{
     		xLine1Left = LINE_LEFT_START;
@@ -351,6 +408,7 @@ static void updateConveyorLeft(void)
         	LCD_DrawLine(xLine1Left, yLinesLeft, xLine1Left, yLinesLeft+21, LCD_COLOR_LINE_GREEN);
     	}
 
+    	/* Update the second line of the animation */
     	if(xLine2Left <= LINE_LEFT_STOP )
     	{
     		xLine2Left = LINE_LEFT_START;
@@ -363,6 +421,7 @@ static void updateConveyorLeft(void)
         	LCD_DrawLine(xLine2Left, yLinesLeft, xLine2Left, yLinesLeft+21, LCD_COLOR_LINE_GREEN);
     	}
 
+    	/* Update the third line of the animation */
     	if(xLine3Left <= LINE_LEFT_STOP )
     	{
     		xLine3Left = LINE_LEFT_START;
@@ -400,11 +459,14 @@ static void updateConveyorLeft(void)
 
 static void updateConveyorRight(void)
 {
-
+	/* Set the running flag manual for demonstration*/
 	int running = 1;
 
+	/* If the conveyor is running */
 	if(running)
 	{
+
+		/* Update the first line of the animation */
     	if(xLine1Right >= LINE_RIGHT_STOP )
     	{
     		xLine1Right = LINE_RIGHT_START;
@@ -417,6 +479,7 @@ static void updateConveyorRight(void)
         	LCD_DrawLine(xLine1Right, yLinesRight, xLine1Right, yLinesRight+21, LCD_COLOR_LINE_GREEN);
     	}
 
+    	/* Update the second line of the animation */
     	if(xLine2Right >= LINE_RIGHT_STOP )
     	{
     		xLine2Right = LINE_RIGHT_START;
@@ -429,6 +492,7 @@ static void updateConveyorRight(void)
         	LCD_DrawLine(xLine2Right, yLinesRight, xLine2Right, yLinesRight+21, LCD_COLOR_LINE_GREEN);
     	}
 
+    	/* Update the third line of the animation */
     	if(xLine3Right >= LINE_RIGHT_STOP )
     	{
     		xLine3Right = LINE_RIGHT_START;
@@ -450,8 +514,6 @@ static void updateConveyorRight(void)
 
 
 
-
-
 /******************************************************************************/
 /* Function:  updateConveyorCenter 											  */
 /******************************************************************************/
@@ -470,6 +532,7 @@ static void updateConveyorRight(void)
 static void updateConveyorCenter(void)
 {
 
+	/* Update the first line of the animation */
 	if(yLine1Center >= LINE_CENTER_STOP )
 	{
 		yLine1Center = LINE_CENTER_START;
@@ -482,6 +545,7 @@ static void updateConveyorCenter(void)
 		LCD_DrawLine(xLinesCenter, yLine1Center, xLinesCenter+21, yLine1Center, LCD_COLOR_LINE_GREEN);
 	}
 
+	/* Update the second line of the animation */
 	if(yLine2Center >= LINE_CENTER_STOP )
 	{
 		yLine2Center = LINE_CENTER_START;
@@ -494,6 +558,7 @@ static void updateConveyorCenter(void)
 		LCD_DrawLine(xLinesCenter, yLine2Center, xLinesCenter+21, yLine2Center, LCD_COLOR_LINE_GREEN);
 	}
 
+	/* Update the third line of the animation */
 	if(yLine3Center >= LINE_CENTER_STOP )
 	{
 		yLine3Center = LINE_CENTER_START;
@@ -543,36 +608,48 @@ static void uartPrintHandler(void)
 	/* Check if the switch S0 is set */
 	if(switchState & 0x01)
 	{
+		/* Display the state of the switch on the LCD */
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS, LCD_SWITCH_0_ON_TEXT);
+
+		/* Create a new mesage and send it via UART */
 		sprintf(ECTSString, "ECTS 1 Position X:%i Y:%d", (int)ECTS_1.x, (int)ECTS_1.y);
 		createUARTMessage(ECTSString);
 	}
 	else
 	{
+		/* Display the state of the switch on the LCD */
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS, LCD_SWITCH_0_OFF_TEXT);
 	}
 
 	/* Check if the switch S1 is set */
 	if(switchState & 0x02)
 	{
+		/* Display the state of the switch on the LCD */
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + LCD_TEXT_OFFSET, LCD_SWITCH_1_ON_TEXT);
+
+		/* Create a new mesage and send it via UART */
 		sprintf(ECTSString, "ECTS 2 Position X:%i Y:%d", (int)ECTS_2.x, (int)ECTS_2.y);
 		createUARTMessage(ECTSString);
 	}
 	else
 	{
+		/* Display the state of the switch on the LCD */
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + LCD_TEXT_OFFSET, LCD_SWITCH_1_OFF_TEXT);
 	}
 
 	/* Check if the switch S2 is set */
 	if(switchState & 0x04)
 	{
+		/* Display the state of the switch on the LCD */
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + 2 * LCD_TEXT_OFFSET, LCD_SWITCH_2_ON_TEXT);
+
+		/* Create a new mesage and send it via UART */
 		sprintf(ECTSString, "ECTS 3 Position X:%i Y:%d", (int)ECTS_3.x, (int)ECTS_3.y);
 		createUARTMessage(ECTSString);
 	}
 	else
 	{
+		/* Display the state of the switch on the LCD */
 		LCD_DisplayStringXY(LCD_TEXT_X_POS, LCD_TEXT_Y_POS + 2 * LCD_TEXT_OFFSET, LCD_SWITCH_2_OFF_TEXT);
 	}
 

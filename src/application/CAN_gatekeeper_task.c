@@ -4,7 +4,12 @@
 * \brief Manages the CAN communication
 *
 * Procedures : 	createCANMessage(uint16_, uint8_t, uint8_t)
-* 				InitCANGatekeeperTask()
+* 				InitCANGatekeeperTask(void)
+* 				setFunctionCANListener(CAN_function_listener_t, uint16_t)
+* 				can_init(void)
+* 				vCANRx(void*)
+* 				vCANTx(void*)
+* 				can_receivedMsgISR(void);
 *
 * \author heimg1
 *
@@ -13,11 +18,9 @@
 * \history 24.03.2014 File Created
 *
 *
-* \bug Description of the bug
-*
 */
 /* ****************************************************************************/
-/* Project name																  */
+/* EZBSY Project Robo														  */
 /* ****************************************************************************/
 
 /* --------------------------------- imports ---------------------------------*/
@@ -54,9 +57,7 @@ static void can_receivedMsgISR(void);
 /******************************************************************************/
 /* Function:  InitCANGatekeeperTask											  */
 /******************************************************************************/
-/*! \brief Short description of the function
-*
-* Function : More detailed description of the function
+/*! \brief Calls the HW init's, create the queues and create the CAN tasks
 *
 * \return None
 *
@@ -65,8 +66,6 @@ static void can_receivedMsgISR(void);
 * \version 0.0.1
 *
 * \date 24.03.2014 File Created
-*
-* \bug Description of the bug
 *
 *******************************************************************************/
 
@@ -79,7 +78,7 @@ void InitCANGatekeeperTask(void)
     qCANRx = xQueueCreate(CAN_QUEUE_LENGTH,sizeof(CARME_CAN_MESSAGE)); /* RX-Message Queue */
     qCANTx = xQueueCreate(CAN_QUEUE_LENGTH,sizeof(CARME_CAN_MESSAGE)); /* TX-Message Queue */
 
-    /* create tasks */
+    /* create the tasks */
     xTaskCreate( vCANRx, ( signed char * ) CAN_RX_TASK_NAME, CAN_STACK_SIZE, NULL, CAN_TASK_PRIORITY, NULL );
     xTaskCreate( vCANTx, ( signed char * ) CAN_TX_TASK_NAME, CAN_STACK_SIZE, NULL, CAN_TASK_PRIORITY, NULL );
 }
@@ -92,9 +91,9 @@ void InitCANGatekeeperTask(void)
 /******************************************************************************/
 /* Function:  can_init														  */
 /******************************************************************************/
-/*! \brief Short description of the function
+/*! \brief init the CAN hardware
 *
-* Function : More detailed description of the function
+* Function : CAN baud: 250k, Tx and Rx mode, register CAN IRQ
 *
 * \return None
 *
@@ -103,8 +102,6 @@ void InitCANGatekeeperTask(void)
 * \version 0.0.1
 *
 * \date 24.03.2014 File Created
-*
-* \bug Description of the bug
 *
 *******************************************************************************/
 static void can_init(void) {
@@ -137,8 +134,6 @@ static void can_init(void) {
 *
 * \date 24.03.2014 File Created
 *
-* \bug Description of the bug
-*
 *******************************************************************************/
 void setFunctionCANListener(CAN_function_listener_t function, uint16_t id)
 {
@@ -160,8 +155,8 @@ void setFunctionCANListener(CAN_function_listener_t function, uint16_t id)
 /*! \brief this function create a CAN-message and send it to the message-queue
 *
 * \param[in]   id Id of the CAN-message
-* \param[in]   dlc Number of data-paket
-* \param[in]   data Data-paket of the CAN-message
+* \param[in]   dlc Number of data-packet
+* \param[in]   data Data-packet of the CAN-message
 *
 * \return None
 *
@@ -170,8 +165,6 @@ void setFunctionCANListener(CAN_function_listener_t function, uint16_t id)
 * \version 0.0.1
 *
 * \date 24.03.2014 File Created
-*
-* \bug Description of the bug
 *
 *******************************************************************************/
 void createCANMessage(uint16_t id, uint8_t dlc, uint8_t data[8])
@@ -189,6 +182,7 @@ void createCANMessage(uint16_t id, uint8_t dlc, uint8_t data[8])
         dlc--;
     }
 
+    /*send the data to the queue*/
     xQueueSendToBack(qCANTx, &tx_message,0);
 }
 /* ****************************************************************************/
@@ -210,8 +204,6 @@ void createCANMessage(uint16_t id, uint8_t dlc, uint8_t data[8])
 * \version 0.0.1
 *
 * \date 24.03.2014 File Created
-*
-* \bug Description of the bug
 *
 *******************************************************************************/
 static void vCANRx(void* pvParameters )
@@ -262,8 +254,6 @@ static void vCANRx(void* pvParameters )
 *
 * \date 24.03.2014 File Created
 *
-* \bug Description of the bug
-*
 *******************************************************************************/
 static void vCANTx(void* pvParameters )
 {
@@ -283,7 +273,8 @@ static void vCANTx(void* pvParameters )
             /* transmit the message */
             CARME_CAN_Write(&tx_Message);
 
-            vTaskDelayUntil( &tx_wait_time, 10 / portTICK_RATE_MS); /* wait for 10ms */
+            /* wait for 10ms */
+            vTaskDelayUntil( &tx_wait_time, 10 / portTICK_RATE_MS);
 
         }
     }
@@ -295,7 +286,7 @@ static void vCANTx(void* pvParameters )
 /******************************************************************************/
 /* Function:  can_receivedMsgISR											  */
 /******************************************************************************/
-/*! \brief called by the CAN-RX interrupthandler
+/*! \brief called by the CAN-RX interrupt handler
 *
 * \param[in] None
 *
@@ -306,8 +297,6 @@ static void vCANTx(void* pvParameters )
 * \version 0.0.1
 *
 * \date 24.03.2014 File Created
-*
-* \bug Description of the bug
 *
 *******************************************************************************/
 static void can_receivedMsgISR(void) {

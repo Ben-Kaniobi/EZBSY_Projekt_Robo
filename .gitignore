@@ -28,3 +28,4 @@ Debug/
 [Tt]humbs.db
 *.DS_Store
 *.lnk
+/Doxygen/
