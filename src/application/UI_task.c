@@ -103,13 +103,13 @@ void InitUITask(void)
 	/* init the carme IO's */
 	CARME_IO1_Init();
 
-//	/* FatFs mount */
-//	if (f_mount(&lcd_fs, "0:", 1) != FR_OK) {
-//		//Default_Handler(); //TODO remove if not used
-//	}
-//
-//	/* Draw background of the screen */
-//    LCD_BMP_DrawBitmap("Back.bmp", 0, 0);
+	/* FatFs mount */
+	if (f_mount(&lcd_fs, "0:", 1) != FR_OK) {
+		//Default_Handler(); //TODO remove if not used
+	}
+
+	/* Draw background of the screen */
+    LCD_BMP_DrawBitmap("Back.bmp", 0, 0);
 
     /* Display title*/
     LCD_SetTextColor(GUI_COLOR_BLACK);
