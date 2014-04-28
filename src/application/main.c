@@ -42,19 +42,7 @@
 //----- Data types -------------------------------------------------------------
 //----- Function prototypes ----------------------------------------------------
 //----- Data -------------------------------------------------------------------
-uint8_t data[8] = {0x01,0x32,0xFF};	/*Example for CAN usage*/
 //----- Implementation ---------------------------------------------------------
-
-/*Example for CAN usage*/
-void CANTest(CARME_CAN_MESSAGE *rx_message){
-	uint8_t rxbuf[8];
-	uint8_t i = 0;
-	for(i = 0; i< rx_message->dlc; i++){
-		rxbuf[i] = rx_message->data[i];
-	}
-	LCD_DisplayStringCenter(6, "Flipper");
-}
-
 
 /*******************************************************************************
  *  function :    main
@@ -77,14 +65,9 @@ int  main(void) {
 	InitUARTTask();
 	InitCANGatekeeperTask();
 	InitECTSUpdaterTask();
-	InitFlipperTask();
+	//InitFlipperTask();
 	InitConveyorTasks();
 	InitRobotTasks();
-
-//	/*Example for CAN usage*/
-//	setFunctionCANListener((CAN_function_listener_t)CANTest, 0x143);
-//	createCANMessage(0x142, 3, data);
-
 
     vTaskStartScheduler();
 

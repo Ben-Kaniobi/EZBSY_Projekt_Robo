@@ -37,6 +37,8 @@
 #include "can.h"
 #include "../src/application/ECTS_updater_task.h"
 #include "../src/application/UART_task.h"
+#include "../src/application/CAN_gatekeeper_task.h"
+#include "../src/application/flipper_task.h"
 #include <stdio.h>
 
 #include "FreeRTOS.h"
@@ -55,6 +57,7 @@
 
 //----- Data -------------------------------------------------------------------
 char ECTSString[50];
+uint8_t CAN_buffer[3];
 //----- Implementation ---------------------------------------------------------
 
 /*******************************************************************************
@@ -155,13 +158,14 @@ void btn_initInterrupt(void) {
  ******************************************************************************/
 void EXTI0_IRQHandler(void) {
 
-	static uint8_t u8Led = 0x00;
-
 	/* Button T3 interrupt on Port I Pin 0 */
 	EXTI_ClearITPendingBit(EXTI_Line0);
 
-	u8Led ^= 0x08;
-	CARME_IO1_LED_Set(u8Led, 0x08);
+	CAN_buffer[0] = MSG_FLIP;
+	CAN_buffer[1] = DB_POS_L;
+	CAN_buffer[2] = DB_SPEED;
+	createCANMessage(CMD_FLIPPER, 3, CAN_buffer);
+
 }
 
 /*******************************************************************************
@@ -178,15 +182,16 @@ void EXTI0_IRQHandler(void) {
  ******************************************************************************/
 void MyEXTI9_5_IRQHandler(void) {
 
-	static uint8_t u8Led = 0x00;
 
     /* Button T0 interrupt on Port C Pin 7 */
     if(EXTI_GetITStatus(EXTI_Line7) != RESET) {
 
         EXTI_ClearITPendingBit(EXTI_Line7);
 
-		sprintf(ECTSString, "ECTS Position 10  Y:456");
-		createUARTMessage(ECTSString);
+    	CAN_buffer[0] = MSG_FLIP;
+    	CAN_buffer[1] = DB_POS_R;
+    	CAN_buffer[2] = DB_SPEED;
+    	createCANMessage(CMD_FLIPPER, 3, CAN_buffer);
     }
 }
 
@@ -206,22 +211,17 @@ void MyEXTI9_5_IRQHandler(void) {
  ******************************************************************************/
 void EXTI15_10_IRQHandler(void) {
 
-	static uint8_t u8Led = 0x00;
 
 	/* Button T1 interrupt on Port B Pin 15 */
 	if(EXTI_GetITStatus(EXTI_Line15) != RESET) {
 
 		EXTI_ClearITPendingBit(EXTI_Line15);
 
-    	u8Led ^= 0x02;
-    	CARME_IO1_LED_Set(u8Led, 0x02);
 	}
 	/* Button T2 interrupt on Port B Pin 14 */
 	if(EXTI_GetITStatus(EXTI_Line14) != RESET) {
 
 		EXTI_ClearITPendingBit(EXTI_Line14);
 
-    	u8Led ^= 0x04;
-    	CARME_IO1_LED_Set(u8Led, 0x04);
 	}
 }
