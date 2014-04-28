@@ -53,11 +53,11 @@ uint8_t payloadLeft[ ][ 8 ] =
 {
 	{ 0x02, 0x80, 0x5B, 0xC9, 0xD0, 0xAA, 0x00, 0x00 },	/* Waiting position */
 	{ 0x02, 0x80, 0xA0, 0xD5, 0x70, 0x87, 0x00, 0x00 },	/* PrepareToTakeEcts */
-//	{ 0x02, 0x80, 0x91, 0xD5, 0x70, 0xAA, 0x00, 0x00 },	/* LiftEctsUp */
-	{ 0x02, 0x80, 0x86, 0xDC, 0x85, 0xAA, 0x00, 0x00 },	/* LiftEctsUp */
-	{ 0x02, 0xCD, 0x86, 0xDC, 0x85, 0xAA, 0x00, 0x00 },	/* RotateToUnloadTray */
+	{ 0x02, 0x80, 0xA0, 0xD5, 0x65, 0xAA, 0x00, 0x00 },	/* LiftEctsUp */
+	{ 0x02, 0xCD, 0x86, 0xDC, 0x65, 0xAA, 0x00, 0x00 },	/* RotateToUnloadTray */
 	{ 0x02, 0xCD, 0x9F, 0xC3, 0x85, 0xAA, 0x00, 0x00 },	/* PrepareToUnloadEcts */
-	{ 0x02, 0xCD, 0x9C, 0xBB, 0x85, 0x87, 0x00, 0x00 },	/* UnloadEctsToTray */
+	{ 0x02, 0xCD, 0x9F, 0xC3, 0x85, 0x87, 0x00, 0x00 },	/* UnloadEctsToTray1 */
+	{ 0x02, 0xCD, 0x9F, 0xC3, 0x60, 0x87, 0x00, 0x00 },	/* UnloadEctsToTray2 */
 	{ 0x02, 0xCD, 0x9C, 0xBB, 0x85, 0x87, 0x00, 0x00 },	/* RemoveArmFromUnloadTray */
 	{ 0x02, 0x80, 0x9C, 0xBB, 0x85, 0x87, 0x00, 0x00 }	/* RotateToConveyor */
 };
@@ -195,7 +195,7 @@ void vRobotLeftTask( void *pvParameters )
 
     	/* Prepare to grab the ECTS */
     	createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, xEctsGrabPosition );
-        vTaskDelay( 600 / portTICK_RATE_MS );
+        vTaskDelay( 500 / portTICK_RATE_MS );
 
         /* Grab the ECTS */
         xEctsGrabPosition[5] = 0xAA;
@@ -205,14 +205,14 @@ void vRobotLeftTask( void *pvParameters )
     	ECTS->z = robo_L;
 		ECTS->x = 4;
 
-        vTaskDelay( 800 / portTICK_RATE_MS );
+        vTaskDelay( 900 / portTICK_RATE_MS );
 
 
 
 
     	/* Lift the ECTS off the conveyor */
     	createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ LiftEctsUp ] );
-        vTaskDelay( 400 / portTICK_RATE_MS );
+        vTaskDelay( 700 / portTICK_RATE_MS );
 
 
     	/* Release semaphore that locks the conveyor from moving */
@@ -234,12 +234,16 @@ void vRobotLeftTask( void *pvParameters )
 
 
 			/* Unload ECTS */
-			createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ UnloadEctsToTray ] );
+			createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ UnloadEctsToTray1 ] );
 		    vTaskDelay( 600 / portTICK_RATE_MS );
 
 		    /* Update ECTS location */
 		    ECTS->z = conveyor_C;
 			ECTS->x = 4;
+
+			/* Unload ECTS */
+			createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ UnloadEctsToTray2 ] );
+			vTaskDelay( 600 / portTICK_RATE_MS );
 
 			/* Remove robot arm from the drop off tray by rotating back to the conveyor */
 			createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ RotateToConveyor ] );

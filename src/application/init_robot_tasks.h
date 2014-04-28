@@ -54,7 +54,8 @@ enum robotPosition
 	LiftEctsUp,
 	RotateToUnloadTray,
 	PrepareToUnloadEcts,
-	UnloadEctsToTray,
+	UnloadEctsToTray1,
+	UnloadEctsToTray2,
 	RemoveArmFromUnloadTray,
 	RotateToConveyor
 };

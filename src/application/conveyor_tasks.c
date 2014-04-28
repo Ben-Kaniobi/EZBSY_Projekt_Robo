@@ -98,7 +98,7 @@ void InitConveyorTasks(void)
 
 	/* Create the tasks */
 	xTaskCreate(vConveyorL_task, ( signed char * ) CONVEYOR_L_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
-	xTaskCreate(vConveyorR_task, ( signed char * ) CONVEYOR_R_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
+	//xTaskCreate(vConveyorR_task, ( signed char * ) CONVEYOR_R_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
 }
 /* ****************************************************************************/
 /* End      :  InitConveyorTasks											  */
