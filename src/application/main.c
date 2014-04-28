@@ -65,6 +65,7 @@ int  main(void) {
 	InitUARTTask();
 	InitCANGatekeeperTask();
 	InitECTSUpdaterTask();
+	//Flipper handled by button for presentation
 	//InitFlipperTask();
 	InitConveyorTasks();
 	InitRobotTasks();
