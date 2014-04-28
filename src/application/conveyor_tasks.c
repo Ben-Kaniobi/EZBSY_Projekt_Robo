@@ -3,14 +3,15 @@
 ******************************************************************************
 * \brief Tasks to handle the left and right conveyors
 *
-* Procedures : 	vConveyorL_task(void*)
+* Procedures :  vConveyorL_task(void*)
 *               vConveyorR_task(void*)
-* 				InitConveyorTasks()
+*               InitConveyorTasks()
 *
 * \author kasen1
 *
-* \version 0.0.1
+* \version 0.1.0
 *
+* \history 28.04.2014 Version 0.1.0
 * \history 12.03.2014 Import from template by wht4
 *
 *
@@ -67,7 +68,7 @@
 #define DB_POS_Y_l   (6)
 
 /* macros --------------------------------------------------------------------*/
-#define CM_TO_X_DATA(x) (1.0f / 0.0048f * (x))    /* Convert X data from CAN to cm (30cm -> 0x186A) */
+#define CM_TO_X_DATA(x) (1.0f / 0.0048f * (x))  /* Convert X data from CAN to cm (30cm -> 0x186A) */
 
 /* ------------------------- module data declaration -------------------------*/
 xSemaphoreHandle xSemaphoreLeftECTS = NULL;
@@ -81,15 +82,21 @@ static void vConveyorR_task(void*);
 
 
 /*******************************************************************************
- *  function :    InitConveyorTasks
- ******************************************************************************/
-/** \brief        Initialisation for task
- *
- *  \type         global
- *
- *  \return
- *
- ******************************************************************************/
+*  function :    InitConveyorTasks
+*******************************************************************************/
+/*! \brief Initialisation for the task
+*
+* \param[in] None
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.1.0
+*
+* \date 28.04.2014 Version 0.1.0
+*
+*******************************************************************************/
 void InitConveyorTasks(void)
 {
 	/* Create and take the ECTS semaphores */
@@ -98,30 +105,36 @@ void InitConveyorTasks(void)
 
 	/* Create the tasks */
 	xTaskCreate(vConveyorL_task, ( signed char * ) CONVEYOR_L_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
+	// Commented out because right robo doesn't work, so the right conveyor isn't used anyway
 	//xTaskCreate(vConveyorR_task, ( signed char * ) CONVEYOR_R_TASK_NAME, CONVEYOR_TASK_STACK_SIZE, NULL, CONVEYOR_TASK_PRIORITY, NULL);
 }
 /* ****************************************************************************/
-/* End      :  InitConveyorTasks											  */
+/* End      :  InitConveyorTasks                                              */
 /* ****************************************************************************/
 
+
 /*******************************************************************************
- *  function :    vConveyorL_task
- ******************************************************************************/
-/** \brief        Handles the left conveyor
- *
- *  \type         global
- *
- *  \param[in]	  pvParameters    not used
- *
- *  \return       void
- *
- ******************************************************************************/
+*  function :    vConveyorL_task
+*******************************************************************************/
+/*! \brief Handles the left conveyor
+*
+* \param[in] None
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.1.0
+*
+* \date 28.04.2014 Version 0.1.0
+*
+*******************************************************************************/
 static void vConveyorL_task(void* pvParameters )
 {
 //	/* Send reset command */
 //	createCANMessage(RESET_L, 0, CAN_buffer);
 
-	/* Send finish command */
+	/* Send finish command to fix problems */
 	CAN_buffer[0] = MSG_DONE;
 	CAN_buffer[1] = 0;
 	CAN_buffer[2] = 0;
@@ -163,27 +176,32 @@ static void vConveyorL_task(void* pvParameters )
 	}
 }
 /* ****************************************************************************/
-/* End      :  vConveyorL_task												  */
+/* End      :  vConveyorL_task                                                */
 /* ****************************************************************************/
 
+
 /*******************************************************************************
- *  function :    vConveyorR_task
- ******************************************************************************/
-/** \brief        Handles the right conveyor
- *
- *  \type         global
- *
- *  \param[in]	  pvParameters    not used
- *
- *  \return       void
- *
- ******************************************************************************/
+*  function :    vConveyorR_task
+*******************************************************************************/
+/*! \brief Handles the right conveyor
+*
+* \param[in] None
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.1.0
+*
+* \date 28.04.2014 Version 0.1.0
+*
+*******************************************************************************/
 static void vConveyorR_task(void* pvParameters ) //TODO copy from left
 {
 	//	/* Send reset command */
 	//	createCANMessage(RESET_R, 0, CAN_buffer);
 
-		/* Send finish command */
+		/* Send finish command to fix problems */
 		CAN_buffer[0] = MSG_DONE;
 		CAN_buffer[1] = 0;
 		CAN_buffer[2] = 0;
@@ -225,6 +243,10 @@ static void vConveyorR_task(void* pvParameters ) //TODO copy from left
 		}
 }
 /* ****************************************************************************/
-/* End      :  vConveyorR_task												  */
+/* End      :  vConveyorR_task                                                */
 /* ****************************************************************************/
 
+
+/* ****************************************************************************/
+/* End Header : conveyor_tasks.c                                              */
+/* ****************************************************************************/

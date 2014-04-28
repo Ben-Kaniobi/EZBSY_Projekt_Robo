@@ -3,17 +3,19 @@
 ******************************************************************************
 * \brief Task to update the position of the ECTS structs
 *
-* Procedures :  vECTS_updater_task(void*)
+* Procedures :  vECTS_updater_task()
 *               InitECTSUpdaterTask()
-*               CAN_conveyorL_status_response(CARME_CAN_MESSAGE*)
-*               CAN_conveyorR_status_response(CARME_CAN_MESSAGE*)
-*               CAN_conveyorC_status_response(CARME_CAN_MESSAGE*)
-*               CAN_conveyor_status_response(uint8_t, uint8_t)
+*               CAN_conveyorL_status_response()
+*               CAN_conveyorR_status_response()
+*               CAN_conveyorC_status_response()
+*               CAN_conveyor_status_response()
+*               find_ECTS()
 *
 * \author kasen1
 *
-* \version 0.0.1
+* \version 0.1.0
 *
+* \history 28.04.2014 Version 0.1.0
 * \history 12.03.2014 Import from template by wht4
 *
 *
@@ -44,9 +46,9 @@
 /* private macro --------------------------------------------------------------*/
 /* Common */
 #define EVER         ;;                 /* For forever loop: for(;;)          */
-#define CONV_SPEED   (0.01f)          /* Speed in cm/ms of the conveyor (evaluated) */
+#define CONV_SPEED   (0.01f)            /* Speed in cm/ms of the conveyor (evaluated) */
 #define TIME_STEP    (200)              /* Time delay in ms for updater task  */
-#define X_STEP       ((CONV_SPEED)*(TIME_STEP)) /* Resulting x step in cm         */
+#define X_STEP       ((CONV_SPEED)*(TIME_STEP)) /* Resulting x step in cm     */
 /* CAN IDs */
 #define GET_STATUS_L (0x110)            /* Status request for left conveyer   */
 #define GET_STATUS_C (0x120)            /* Status request for center conveyer */
@@ -107,16 +109,23 @@ xSemaphoreHandle xMutexEditECTS = NULL;
 
 /* implementation ------------------------------------------------------------*/
 
+
 /*******************************************************************************
- *  function :    InitECTSUpdaterTask
- ******************************************************************************/
-/** \brief        Initialisation for task
- *
- *  \type         global
- *
- *  \return
- *
- ******************************************************************************/
+*  function :    InitECTSUpdaterTask
+*******************************************************************************/
+/*! \brief Initialisation for the task
+*
+* \param[in] None
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.1.0
+*
+* \date 28.04.2014 Version 0.1.0
+*
+*******************************************************************************/
 void  InitECTSUpdaterTask(void) {
 
 	/* Set a CAN listener functions for conveyor status response */
@@ -129,22 +138,27 @@ void  InitECTSUpdaterTask(void) {
 
 	xTaskCreate(vECTS_updater_task, (signed char *) ECTS_UPDATER_TASK_NAME, ECTS_UPDATER_STACK_SIZE, NULL, ECTS_UPDATER_TASK_PRIORITY, NULL);
 }
-/* ****************************************************************************/
-/* End      :  InitECTSUpdaterTask                                            */
-/* ****************************************************************************/
+/*****************************************************************************/
+/* End      :  InitECTSUpdaterTask                                           */
+/*****************************************************************************/
+
 
 /*******************************************************************************
- *  function :    vECTS_updater_task
- ******************************************************************************/
-/** \brief        Updates values of the ECTS'
- *
- *  \type         global
- *
- *  \param[in]	  pvData    not used
- *
- *  \return       void
- *
- ******************************************************************************/
+*  function :    vECTS_updater_task
+*******************************************************************************/
+/*! \brief Task to update the values of the ECTS'
+*
+* \param[in] pvData    not used
+*
+* \return None
+*
+* \author kasen1
+*
+* \version 0.1.0
+*
+* \date 28.04.2014 Version 0.1.0
+*
+*******************************************************************************/
 static void vECTS_updater_task(void *pvData) {
 
 	/* We need to initialise xLastFlashTime prior to the first call to vTaskDelayUntil() */
@@ -155,6 +169,7 @@ static void vECTS_updater_task(void *pvData) {
 		/* Get mutex for ECTS access */
 		if(xSemaphoreTake(xMutexEditECTS, (TIME_STEP/4) / portTICK_RATE_MS) == pdTRUE) {
 
+// Commented out for presentation
 //			/* Updater x position */
 //			if(ECTS_1.x < X_STEP_MAX) {
 //
@@ -168,6 +183,7 @@ static void vECTS_updater_task(void *pvData) {
 //
 //				ECTS_3.x += X_STEP;
 //			}
+// Replaced with following code:
 			if(ECTS_1.x >= X_STEP_MAX) {
 				ECTS_1.x = 0;
 			}
@@ -177,6 +193,9 @@ static void vECTS_updater_task(void *pvData) {
 			if(ECTS_3.x >= X_STEP_MAX) {
 				ECTS_3.x = 0;
 			}
+// End of replacement code
+
+			/* Increment x position */
 			ECTS_1.x += X_STEP;
 			ECTS_2.x += X_STEP;
 			ECTS_3.x += X_STEP;
@@ -198,9 +217,10 @@ static void vECTS_updater_task(void *pvData) {
 /* End      :  init_ECTS_updater_tasks                                        */
 /* ****************************************************************************/
 
-/******************************************************************************/
-/* Function:  CAN_conveyorL_status_response                                   */
-/******************************************************************************/
+
+/*******************************************************************************
+*  function :    CAN_conveyorL_status_response
+*******************************************************************************/
 /*! \brief Function which is called by CAN gatekeeper when a status
 *          response for the left conveyor was received.
 *
@@ -210,9 +230,9 @@ static void vECTS_updater_task(void *pvData) {
 *
 * \author kasen1
 *
-* \version 0.0.1
+* \version 0.1.0
 *
-* \date 12.03.2014 Created
+* \date 28.04.2014 Version 0.1.0
 *
 *******************************************************************************/
 void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message) {
@@ -225,14 +245,15 @@ void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message) {
 	/* Else: Error message received */
 }
 /* ****************************************************************************/
-/* End      :  CAN_conveyorL_status_response                                  */
+/* End      :  CAN_conveyorL_status_respons                                   */
 /* ****************************************************************************/
 
-/******************************************************************************/
-/* Function:  CAN_conveyorR_status_response                                   */
-/******************************************************************************/
+
+/*******************************************************************************
+*  function :    CAN_conveyorR_status_response
+*******************************************************************************/
 /*! \brief Function which is called by CAN gatekeeper when a status
-*          response for the left conveyor was received.
+*          response for the right conveyor was received.
 *
 * \param[in] *rx_message The received CAN message
 *
@@ -240,9 +261,9 @@ void CAN_conveyorL_status_response(CARME_CAN_MESSAGE *rx_message) {
 *
 * \author kasen1
 *
-* \version 0.0.1
+* \version 0.1.0
 *
-* \date 12.03.2014 Created
+* \date 28.04.2014 Version 0.1.0
 *
 *******************************************************************************/
 void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message) {
@@ -258,11 +279,12 @@ void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message) {
 /* End      :  CAN_conveyorR_status_response                                  */
 /* ****************************************************************************/
 
-/******************************************************************************/
-/* Function:  CAN_conveyorC_status_response                                   */
-/******************************************************************************/
+
+/*******************************************************************************
+*  function :    CAN_conveyorC_status_response
+*******************************************************************************/
 /*! \brief Function which is called by CAN gatekeeper when a status
-*          response for the left conveyor was received.
+*          response for the centre conveyor was received.
 *
 * \param[in] *rx_message The received CAN message
 *
@@ -270,9 +292,9 @@ void CAN_conveyorR_status_response(CARME_CAN_MESSAGE *rx_message) {
 *
 * \author kasen1
 *
-* \version 0.0.1
+* \version 0.1.0
 *
-* \date 12.03.2014 Created
+* \date 28.04.2014 Version 0.1.0
 *
 *******************************************************************************/
 void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message) {
@@ -294,7 +316,6 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message) {
 /*! \brief Function to handle conveyor status responses
 *
 * \param[in] conveyor The conveyor for which the message was received
-*
 * \param[in] data[] The status data (8 bit max.)
 *
 * \return None
@@ -303,7 +324,7 @@ void CAN_conveyorC_status_response(CARME_CAN_MESSAGE *rx_message) {
 *
 * \version 0.0.1
 *
-* \date 12.03.2014 Created
+* \date 28.04.2014 Version 0.1.0
 *
 *******************************************************************************/
 void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
@@ -338,7 +359,7 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 	if(ECTS_p == NULL) {
 
 		/* ECTS_p hasn't been set before --> no ECTS was on the conveyor but was now detected */
-		//TODO: Handle?
+		//TODO?: Handle
 	}
 	else {
 
@@ -374,6 +395,7 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 
 			/* Concat the two bytes */
 			uint16_t pos_y = ((uint16_t)data[DB_POS_Y_h]<<8 & 0xFF00) | (data[DB_POS_Y_l] & 0xFF);
+
 			/* Convert to our format (conveyor width divided in 8 sections/lines) */
 			if(pos_y <= 868) /* between 800 and 868 */ {
 				pos_y = 0;
@@ -403,11 +425,13 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 			if(conveyor == conveyor_L) {
 				pos_y = 7-pos_y;
 			}
-			/* Finally set the position for the correct ECTS */
+
 			/* Get mutex for ECTS access */
 			if(xSemaphoreTake(xMutexEditECTS, portMAX_DELAY) == pdTRUE) {
+
 				/* Finally set the position for the correct ECTS */
 				ECTS_p->y = pos_y;
+
 				/* Release mutex */
 				xSemaphoreGive(xMutexEditECTS);
 			}
@@ -418,21 +442,22 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]) {
 /* End      :  CAN_conveyor_status_response                                   */
 /* ****************************************************************************/
 
-/******************************************************************************/
-/* Function:  find_ECTS                                                       */
-/******************************************************************************/
-/*! \brief Finds the correct ECTS
+
+/*******************************************************************************
+*  function :    find_ECTS
+*******************************************************************************/
+/*! \brief Finds the last/furthest ECTS at location _z_pos
 *
-* \param[out] *ECTS_p Pointer to the found ECTS, NULL if not found
-* \param[in] _z_pos The conveyor to search
+* \param[out] **ECTS_p Pointer to the found ECTS, NULL if not found
+* \param[in] _z_pos The location to search
 *
 * \return None
 *
 * \author kasen1
 *
-* \version 0.0.1
+* \version 0.1.0
 *
-* \date 12.03.2014 Created
+* \date 28.04.2014 Version 0.1.0
 *
 *******************************************************************************/
 void find_ECTS(ects **ECTS_p, z_pos _z_pos) {
@@ -463,35 +488,33 @@ void find_ECTS(ects **ECTS_p, z_pos _z_pos) {
 	case conveyor_R: /* Fall through */
 	case conveyor_C:
 
-		/* Find last ECTS */
+		/* Find ECTS' on this z_pos */
 		if(ECTS_1.z == _z_pos) {
 			ectsTemp[k++] = &ECTS_1;
 		}
-
 		if(ECTS_2.z == _z_pos) {
 			ectsTemp[k++] = &ECTS_2;
 		}
-
 		if(ECTS_3.z == _z_pos) {
 			ectsTemp[k++] = &ECTS_3;
 		}
 
+		/* Sort the ECTS' by x position */
 		if(k == 3) {
-		 if(ectsTemp[2]->x > ectsTemp[1]->x) {
-			 ectsTemp[1] = ectsTemp[2];
-		 }
+			if(ectsTemp[2]->x > ectsTemp[1]->x) {
+				ectsTemp[1] = ectsTemp[2];
+			}
 		}
-
-
 		if(k >= 2) {
 			if(ectsTemp[1]->x > ectsTemp[0]->x) {
 				ectsTemp[0] = ectsTemp[1];
 			}
 		}
 
+		/* "Return" ECTS with highest x position */
 		*ECTS_p = ectsTemp[0];
 
-//OLD:
+// Old version with pointer problem
 //		/* Find the last ECTS on this conveyor */
 //		*ECTS_p = NULL;
 //
@@ -542,4 +565,9 @@ void find_ECTS(ects **ECTS_p, z_pos _z_pos) {
 }
 /* ****************************************************************************/
 /* End      :  find_ECTS                                                      */
+/* ****************************************************************************/
+
+
+/* ****************************************************************************/
+/* End Header : ECTS_updater_task.c                                           */
 /* ****************************************************************************/

@@ -7,8 +7,9 @@
 *
 * \author kasen1
 *
-* \version 0.0.1
+* \version 0.1.0
 *
+* \history 28.04.2014 Version 0.1.0
 * \history 12.03.2014 Import from template by wht4
 *
 *
@@ -34,17 +35,17 @@
 #define FLIPPER_TASK_PRIORITY		(configMAX_PRIORITIES - 1UL) 	/*!< priority of the task */
 
 /* CAN IDs */
-#define CMD_FLIPPER  (0x142)            /* CAN id for flipper command         */
-#define CMD_C        (0x122)            /* CAN id for center conveyor command */
-#define RESET_C      (0x12F)            /* Reset for center conveyer          */
+#define CMD_FLIPPER  (0x142)            /*< CAN id for flipper command         */
+#define CMD_C        (0x122)            /*< CAN id for center conveyor command */
+#define RESET_C      (0x12F)            /*< Reset for center conveyer          */
 /* CAN messages */
-#define MSG_START    (0x01)             /* CAN message to start conveyor      */
+#define MSG_START    (0x01)             /*< CAN message to start conveyor      */
 #define MSG_DONE     (0x04)
-#define MSG_FLIP     (0x01)             /* CAN message to move flipper        */
+#define MSG_FLIP     (0x01)             /*< CAN message to move flipper        */
 /* CAN DB values */
-#define DB_SPEED     (0x50)             /* Speed for the flipper, 5-255, 0 for default */
-#define DB_POS_L     (150)              /* Left flipper position              */
-#define DB_POS_R     (105)              /* Right flipper position             */
+#define DB_SPEED     (0x50)             /*< Speed for the flipper, 5-255, 0 for default */
+#define DB_POS_L     (150)              /*< Left flipper position              */
+#define DB_POS_R     (105)              /*< Right flipper position             */
 
 /* ------------------------- module type declaration -------------------------*/
 
@@ -57,6 +58,6 @@
 extern void InitFlipperTask(void);
 
 /* ****************************************************************************/
-/* End Header : default_task.h												  */
+/* End Header : flipper_task.h												  */
 /* ****************************************************************************/
 #endif /* __APP_FLIPPER_TASK_H_ */
