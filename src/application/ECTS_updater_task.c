@@ -96,9 +96,9 @@ void CAN_conveyor_status_handler(z_pos conveyor, uint8_t data[]);
 void find_ECTS(ects **ECTS_p, z_pos conveyor);
 
 /* data ----------------------------------------------------------------------*/
-ects ECTS_1 = {0, 0, 1, conveyor_R};
-ects ECTS_2 = {1, 0, 2, conveyor_C};
-ects ECTS_3 = {2, 0, 3, conveyor_L};
+ects ECTS_1 = {0, 4, 4, conveyor_R};
+ects ECTS_2 = {1, 4, 4, conveyor_C};
+ects ECTS_3 = {2, 4, 4, conveyor_L};
 conveyorState conveyor_L_state = STOPPED;
 conveyorState conveyor_C_state = STOPPED;
 conveyorState conveyor_R_state = STOPPED;
@@ -155,19 +155,31 @@ static void vECTS_updater_task(void *pvData) {
 		/* Get mutex for ECTS access */
 		if(xSemaphoreTake(xMutexEditECTS, (TIME_STEP/4) / portTICK_RATE_MS) == pdTRUE) {
 
-			/* Updater x position */
-			if(ECTS_1.x < X_STEP_MAX) {
-
-				ECTS_1.x += X_STEP;
+//			/* Updater x position */
+//			if(ECTS_1.x < X_STEP_MAX) {
+//
+//				ECTS_1.x += X_STEP;
+//			}
+//			if(ECTS_2.x < X_STEP_MAX) {
+//
+//				ECTS_2.x += X_STEP;
+//			}
+//			if(ECTS_3.x < X_STEP_MAX) {
+//
+//				ECTS_3.x += X_STEP;
+//			}
+			if(ECTS_1.x >= X_STEP_MAX) {
+				ECTS_1.x = 0;
 			}
-			if(ECTS_2.x < X_STEP_MAX) {
-
-				ECTS_2.x += X_STEP;
+			if(ECTS_2.x >= X_STEP_MAX) {
+				ECTS_2.x = 0;
 			}
-			if(ECTS_3.x < X_STEP_MAX) {
-
-				ECTS_3.x += X_STEP;
+			if(ECTS_3.x >= X_STEP_MAX) {
+				ECTS_3.x = 0;
 			}
+			ECTS_1.x += X_STEP;
+			ECTS_2.x += X_STEP;
+			ECTS_3.x += X_STEP;
 
 			/* Release mutex */
 			xSemaphoreGive(xMutexEditECTS);

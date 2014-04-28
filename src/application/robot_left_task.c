@@ -133,71 +133,65 @@ void vRobotLeftTask( void *pvParameters )
 
         /* Initialize standard grab gesture */
         uint8_t xEctsGrabPosition[ 8 ] = { 0x02, 0x80, 0xA0, 0xD5, 0x70, 0x87, 0x00, 0x00 };
-
-        /* Debug and fix */
-        test = ECTS->y;
-        if(ECTS->y > 7) {
-        	ECTS->y = 4;
-        }
-
-        /* Choose which position the ECTS actually has and adjust grab gesture accordingly */
-        switch( ECTS->y )
-//        switch( 0 )
-        {
-        	case 0:
-        		xEctsGrabPosition[2] = 0x9A;
-        		xEctsGrabPosition[3] = 0xDA;
-        		xEctsGrabPosition[4] = 0x73;
-				break;
-
-        	case 1:
-				xEctsGrabPosition[2] = 0x9A;
-				xEctsGrabPosition[3] = 0xD4;
-				xEctsGrabPosition[4] = 0x78;
-				break;
-
-        	case 2:
-				xEctsGrabPosition[2] = 0x9D;
-				xEctsGrabPosition[3] = 0xD0;
-				xEctsGrabPosition[4] = 0x7A;
-				break;
-
-        	case 3:
-				xEctsGrabPosition[2] = 0x9F;
-				xEctsGrabPosition[3] = 0xCB;
-				xEctsGrabPosition[4] = 0x7C;
-				break;
-
-        	case 4:
-				xEctsGrabPosition[2] = 0xA1;
-				xEctsGrabPosition[3] = 0xC6;
-				xEctsGrabPosition[4] = 0x7F;
-				break;
-
-        	case 5:
-				xEctsGrabPosition[2] = 0xA4;
-				xEctsGrabPosition[3] = 0xC1;
-				xEctsGrabPosition[4] = 0x81;
-				break;
-
-        	case 6:
-				xEctsGrabPosition[2] = 0xA7;
-				xEctsGrabPosition[3] = 0xBC;
-				xEctsGrabPosition[4] = 0x84;
-				break;
-
-        	case 7:
-				xEctsGrabPosition[2] = 0xAC;
-				xEctsGrabPosition[3] = 0xAF;
-				xEctsGrabPosition[4] = 0x8B;
-				break;
-
-			default:	/* If the position is not valid */
-
-				/* Let the conveyor move ahead (ignoring this ECTS) */
-				xSemaphoreGive( xSemaphoreLeftConveyor );
-				continue;	/* for */
-        }
+//
+//        /* Choose which position the ECTS actually has and adjust grab gesture accordingly */
+//        switch( ECTS->y )
+////        switch( 0 )
+//        {
+//        	case 0:
+//        		xEctsGrabPosition[2] = 0x9A;
+//        		xEctsGrabPosition[3] = 0xDA;
+//        		xEctsGrabPosition[4] = 0x73;
+//				break;
+//
+//        	case 1:
+//				xEctsGrabPosition[2] = 0x9A;
+//				xEctsGrabPosition[3] = 0xD4;
+//				xEctsGrabPosition[4] = 0x78;
+//				break;
+//
+//        	case 2:
+//				xEctsGrabPosition[2] = 0x9D;
+//				xEctsGrabPosition[3] = 0xD0;
+//				xEctsGrabPosition[4] = 0x7A;
+//				break;
+//
+//        	case 3:
+//				xEctsGrabPosition[2] = 0x9F;
+//				xEctsGrabPosition[3] = 0xCB;
+//				xEctsGrabPosition[4] = 0x7C;
+//				break;
+//
+//        	case 4:
+//				xEctsGrabPosition[2] = 0xA1;
+//				xEctsGrabPosition[3] = 0xC6;
+//				xEctsGrabPosition[4] = 0x7F;
+//				break;
+//
+//        	case 5:
+//				xEctsGrabPosition[2] = 0xA4;
+//				xEctsGrabPosition[3] = 0xC1;
+//				xEctsGrabPosition[4] = 0x81;
+//				break;
+//
+//        	case 6:
+//				xEctsGrabPosition[2] = 0xA7;
+//				xEctsGrabPosition[3] = 0xBC;
+//				xEctsGrabPosition[4] = 0x84;
+//				break;
+//
+//        	case 7:
+//				xEctsGrabPosition[2] = 0xAC;
+//				xEctsGrabPosition[3] = 0xAF;
+//				xEctsGrabPosition[4] = 0x8B;
+//				break;
+//
+//			default:	/* If the position is not valid */
+//
+//				/* Let the conveyor move ahead (ignoring this ECTS) */
+//				xSemaphoreGive( xSemaphoreLeftConveyor );
+//				continue;	/* for */
+//        }
 
     	/* Prepare to grab the ECTS */
     	createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, xEctsGrabPosition );
