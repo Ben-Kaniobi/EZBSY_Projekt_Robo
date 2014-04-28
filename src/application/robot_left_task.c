@@ -3,24 +3,16 @@
 ******************************************************************************
 * \brief Task that controls the left robot arm
 *
-* Function : More detailed description of the files function
+* Function : This task controls one robot arm and it's interaction with the
+* environment. It avoids collisions between the other robot.
 *
-* Procedures : 	vRobotLeftTask(void*)
-* 				InitRobotLeftTask()
-*              	function3()...
+* Procedures : 	vRobotLeftTask( void *pvParameters )
 *
 * \author plats1
 *
-* \version 0.0.1
+* \version 1.0.0
 *
-* \history 07.04.2014 File Created
-*
-*
-* \ingroup <group name> [<group name 2> <group name 3>]
-*
-* \todo If u have some todo's for the c-file, add it here
-*
-* \bug Description of the bug
+* \history 28.04.2014 File Created
 *
 */
 /* ****************************************************************************/
@@ -40,11 +32,11 @@
 #include <memPoolService.h>
 
 /* application */
-#include "init_robot_tasks.h"		/* Own header include */
-#include "robot_left_task.h"
-#include "CAN_gatekeeper_task.h"
-#include "conveyor_tasks.h"
-#include "ECTS_updater_task.h"
+#include "init_robot_tasks.h"		/* Import for having access to the defines */
+#include "robot_left_task.h"		/* Own header include */
+#include "CAN_gatekeeper_task.h"	/* CAN functionality */
+#include "conveyor_tasks.h"			/* Semaphore for ECTS lift up synchronization */
+#include "ECTS_updater_task.h"		/* ECTS position structs */
 
 
 /* ------------------------- module data declaration -------------------------*/
@@ -60,10 +52,8 @@ uint8_t payloadLeft[ ][ 8 ] =
 	{ 0x02, 0xCD, 0x9F, 0xC3, 0x60, 0x87, 0x00, 0x00 },	/* UnloadEctsToTray2 */
 	{ 0x02, 0xCD, 0x9C, 0xBB, 0x85, 0x87, 0x00, 0x00 },	/* RemoveArmFromUnloadTray */
 	{ 0x02, 0x80, 0x9C, 0xBB, 0x85, 0x87, 0x00, 0x00 }	/* RotateToConveyor */
-};
+};		/*!< Position look up table for the robot gestures */
 
-
-uint8_t test = 0;
 
 /* ----------------------- module procedure declaration ----------------------*/
 
@@ -76,9 +66,10 @@ uint8_t test = 0;
 /******************************************************************************/
 /* Function:  vRobotLeftTask												  */
 /******************************************************************************/
-/*! \brief Short description of the function2
+/*! \brief Function that controls the left robot arm
 *
-* Function : More detailed description of the function2
+* Function : This function controls the left robot arm by sending appropriate CAN
+* commands to the robot arm node on the stellaris hardware
 *
 * \param[in] pvParameters  Pointer for given parameter
 *
@@ -86,14 +77,9 @@ uint8_t test = 0;
 *
 * \author plats1
 *
-* \version 0.0.1
+* \version 1.0.0
 *
-* \date 07.04.2014 File Created
-*
-*
-* \todo If u have some todo's for the function, add it here
-*
-* \bug Description of the bug
+* \date 28.04.2014 File Created
 *
 *******************************************************************************/
 
@@ -209,7 +195,6 @@ void vRobotLeftTask( void *pvParameters )
 
 
 
-
     	/* Lift the ECTS off the conveyor */
     	createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ LiftEctsUp ] );
         vTaskDelay( 700 / portTICK_RATE_MS );
@@ -241,7 +226,7 @@ void vRobotLeftTask( void *pvParameters )
 		    ECTS->z = conveyor_C;
 			ECTS->x = 4;
 
-			/* Unload ECTS */
+			/* Lift robot hand up (for not sliding the upper ECTS away if stacking multiple ECTS :P) */
 			createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ UnloadEctsToTray2 ] );
 			vTaskDelay( 600 / portTICK_RATE_MS );
 

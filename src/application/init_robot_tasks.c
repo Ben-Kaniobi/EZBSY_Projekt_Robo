@@ -1,26 +1,18 @@
 /******************************************************************************/
 /*! \file init_robot_tasks.c
 ******************************************************************************
-* \brief Task that controls the left robot arm
+* \brief Initiates the robot tasks
 *
-* Function : More detailed description of the files function
+* Function : This file provides a function to initialize the robot tasks for
+* both arms
 *
-* Procedures : 	vRobotLeftTask(void*)
-* 				InitRobotLeftTask()
-*              	function3()...
+* Procedures : 	InitRobotTasks()
 *
 * \author plats1
 *
-* \version 0.0.1
+* \version 1.0.0
 *
-* \history 07.04.2014 File Created
-*
-*
-* \ingroup <group name> [<group name 2> <group name 3>]
-*
-* \todo If u have some todo's for the c-file, add it here
-*
-* \bug Description of the bug
+* \history 28.04.2014 File Created
 *
 */
 /* ****************************************************************************/
@@ -40,9 +32,9 @@
 #include <memPoolService.h>
 
 /* application */
-#include "init_robot_tasks.h"
-#include "robot_left_task.h"
-#include "robot_right_task.h"
+#include "init_robot_tasks.h"		/* Own .h file */
+#include "robot_left_task.h"		/* Header of the left robot task */
+#include "robot_right_task.h"		/* Header of the right robot task */
 
 
 /* ------------------------- module data declaration -------------------------*/
@@ -63,22 +55,19 @@ xSemaphoreHandle xSemaphoreEctsTray;
 /******************************************************************************/
 /* Function:  InitRobotTasks												  */
 /******************************************************************************/
-/*! \brief Short description of the function
+/*! \brief Function to initialize the robot tasks
 *
-* Function : More detailed description of the function
+* Function : This function creates the required semaphores for task synchronisation
+* between the two robot arms and the conveyors. Just after the semaphores have been
+* created, both robots tasks are created.
 *
 * \return None
 *
 * \author plats1
 *
-* \version 0.0.1
+* \version 1.0.0
 *
-* \date 07.04.2014 File Created
-*
-*
-* \todo If u have some todo's for the function, add it here
-*
-* \bug Description of the bug
+* \date 28.04.2014 File Created
 *
 *******************************************************************************/
 
