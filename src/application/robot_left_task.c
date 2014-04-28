@@ -134,7 +134,11 @@ void vRobotLeftTask( void *pvParameters )
         /* Initialize standard grab gesture */
         uint8_t xEctsGrabPosition[ 8 ] = { 0x02, 0x80, 0xA0, 0xD5, 0x70, 0x87, 0x00, 0x00 };
 
+        /* Debug and fix */
         test = ECTS->y;
+        if(ECTS->y > 7) {
+        	ECTS->y = 4;
+        }
 
         /* Choose which position the ECTS actually has and adjust grab gesture accordingly */
         switch( ECTS->y )
@@ -205,7 +209,7 @@ void vRobotLeftTask( void *pvParameters )
 
     	/* Update ECTS position */
     	ECTS->z = robo_L;
-		ECTS->x = 0;
+		ECTS->x = 4;
 
         vTaskDelay( 800 / portTICK_RATE_MS );
 
@@ -241,7 +245,7 @@ void vRobotLeftTask( void *pvParameters )
 
 		    /* Update ECTS location */
 		    ECTS->z = conveyor_C;
-			ECTS->x = 0;
+			ECTS->x = 4;
 
 			/* Remove robot arm from the drop off tray by rotating back to the conveyor */
 			createCANMessage( CAN_ID_LEFT_ROBOT, CAN_INSTRUCTION_DLC, payloadLeft[ RotateToConveyor ] );

@@ -45,7 +45,7 @@
 #define DB_POS_L     (150)              /* Left flipper position              */
 #define DB_POS_R     (105)              /* Right flipper position             */
 /* Flipper */
-#define FLIPPER_X_MIN (37)              /* Min. x pos. in cm for ECTS to be in flipper area */
+#define FLIPPER_X_MIN (37-10)              /* Min. x pos. in cm for ECTS to be in flipper area */
 
 /* ------------------------- module data declaration -------------------------*/
 uint8_t CAN_buffer[8];
@@ -111,7 +111,7 @@ static void vFlipper_task(void* pvParameters )
 	vTaskDelay(50 / portTICK_RATE_MS);
 
 	/* Create shadow variable for flipper */
-	enum {FLIPPER_LEFT=DB_POS_L, FLIPPER_RIGHT=DB_POS_R} flipper_shadow = FLIPPER_LEFT;
+	enum {FLIPPER_LEFT=DB_POS_L, FLIPPER_RIGHT=DB_POS_R} flipper_shadow = FLIPPER_RIGHT;
 	/* Set the flipper start position */
 	CAN_buffer[0] = MSG_FLIP;
 	CAN_buffer[1] = DB_POS_L;
@@ -128,25 +128,60 @@ static void vFlipper_task(void* pvParameters )
 
 			if(ECTS_p->x > FLIPPER_X_MIN) {
 
-				/* ECTS in reach, toggle flipper */
-				if(flipper_shadow == FLIPPER_LEFT) {
-					flipper_shadow = FLIPPER_RIGHT;
+// Auskommentiert, damit nur auf eine Seite
+//				/* ECTS in reach, toggle flipper */
+//				if(flipper_shadow == FLIPPER_LEFT) {
+//					flipper_shadow = FLIPPER_RIGHT;
+//
+//					/* Update position */
+//					ECTS_p->z = conveyor_R;
+//					ECTS_p->x = 0;
+//				}
+//				else {
+//					flipper_shadow = FLIPPER_LEFT;
+//
+//					/* Update z position */
+//					ECTS_p->z = conveyor_L;
+//					ECTS_p->x = 0;
+//				}
+//
+//				/* Set the flipper position */
+//				CAN_buffer[0] = MSG_FLIP;
+//				CAN_buffer[1] = flipper_shadow;
+//				CAN_buffer[2] = DB_SPEED;
+//				createCANMessage(CMD_FLIPPER, 3, CAN_buffer);
+//				vTaskDelay(50 / portTICK_RATE_MS);
+//
+//				/* Send finish command */
+//				CAN_buffer[0] = MSG_DONE;
+//				CAN_buffer[1] = 0;
+//				CAN_buffer[2] = 0;
+//				createCANMessage(CMD_C, 3, CAN_buffer);
+//				vTaskDelay(50 / portTICK_RATE_MS);
+//
+//				/* Start the center conveyor */
+//				CAN_buffer[0] = MSG_START;
+//				CAN_buffer[1] = 0;
+//				CAN_buffer[2] = 0;
+//				createCANMessage(CMD_C, 3, CAN_buffer);
+//				vTaskDelay(50 / portTICK_RATE_MS);
+//
+//				Ersatz --v
 
-					/* Update position */
-					ECTS_p->z = conveyor_R;
-					ECTS_p->x = 0;
-				}
-				else {
-					flipper_shadow = FLIPPER_LEFT;
-
-					/* Update z position */
-					ECTS_p->z = conveyor_L;
-					ECTS_p->x = 0;
-				}
 
 				/* Set the flipper position */
 				CAN_buffer[0] = MSG_FLIP;
-				CAN_buffer[1] = flipper_shadow;
+				CAN_buffer[1] = FLIPPER_LEFT;
+				CAN_buffer[2] = DB_SPEED;
+				createCANMessage(CMD_FLIPPER, 3, CAN_buffer);
+				vTaskDelay(50 / portTICK_RATE_MS);
+
+				/* Wait */
+				vTaskDelay(100 / portTICK_RATE_MS);
+
+				/* Set the flipper position */
+				CAN_buffer[0] = MSG_FLIP;
+				CAN_buffer[1] = FLIPPER_RIGHT;
 				CAN_buffer[2] = DB_SPEED;
 				createCANMessage(CMD_FLIPPER, 3, CAN_buffer);
 				vTaskDelay(50 / portTICK_RATE_MS);
@@ -164,6 +199,11 @@ static void vFlipper_task(void* pvParameters )
 				CAN_buffer[2] = 0;
 				createCANMessage(CMD_C, 3, CAN_buffer);
 				vTaskDelay(50 / portTICK_RATE_MS);
+//
+//
+//				Ersatz --^
+//
+//
 			}
 		}
 

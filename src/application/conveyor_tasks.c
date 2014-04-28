@@ -180,56 +180,51 @@ static void vConveyorL_task(void* pvParameters )
  ******************************************************************************/
 static void vConveyorR_task(void* pvParameters ) //TODO copy from left
 {
-	portTickType xLastFlashTime;
+	//	/* Send reset command */
+	//	createCANMessage(RESET_R, 0, CAN_buffer);
 
-	/* We need to initialise xLastFlashTime prior to the first call to
-	vTaskDelayUntil(). */
-	xLastFlashTime = xTaskGetTickCount();
+		/* Send finish command */
+		CAN_buffer[0] = MSG_DONE;
+		CAN_buffer[1] = 0;
+		CAN_buffer[2] = 0;
+		createCANMessage(CMD_R, 3, CAN_buffer);
+		vTaskDelay(50 / portTICK_RATE_MS);
 
-//	/* Send reset command */
-//	createCANMessage(RESET_R, 0, CAN_buffer);
-
-	/* Send finish command */
-	CAN_buffer[0] = MSG_DONE;
-	CAN_buffer[1] = 0;
-	createCANMessage(CMD_R, 2, CAN_buffer);
-
-	for(;;)
-	{
-		/* Wait for the conveyor semaphore */
-		if(xSemaphoreTake(xSemaphoreRightConveyor, portMAX_DELAY) == pdTRUE) {
+		for(;;)
+		{
+			/* Wait for the conveyor semaphore */
+			xSemaphoreTake(xSemaphoreRightConveyor, portMAX_DELAY);
 
 			/* Send "stop the conveyor at position" message */
 			CAN_buffer[0] = MSG_STOP_AT;
-			CAN_buffer[1] = ((uint8_t)CM_TO_X_DATA(CONVEYOR_STOP_X) >> 8) & 0xFF;  /* High byte */
-			CAN_buffer[2] = ((uint8_t)CM_TO_X_DATA(CONVEYOR_STOP_X)) & 0xFF;  /* Low byte */
+			CAN_buffer[1] = ((uint16_t)CM_TO_X_DATA(CONVEYOR_STOP_X) >> 8) & 0xFF;  /* High byte */
+			CAN_buffer[2] = ((uint16_t)CM_TO_X_DATA(CONVEYOR_STOP_X)) & 0xFF;  /* Low byte */
 			createCANMessage(CMD_R, 3, CAN_buffer);
+			vTaskDelay(50 / portTICK_RATE_MS);
 
 			/* Start the conveyor */
 			CAN_buffer[0] = MSG_START;
 			CAN_buffer[1] = 0;
 			CAN_buffer[2] = 0;
 			createCANMessage(CMD_R, 3, CAN_buffer);
+			vTaskDelay(50 / portTICK_RATE_MS);
+			conveyor_R_state = RUNNING;
 
 			/* Wait while conveyor still moving */
 			while(conveyor_R_state != STOPPED) {
-
 				vTaskDelay(50 / portTICK_RATE_MS);
 			}
 
-			/* Send finish command */
-			CAN_buffer[0] = MSG_DONE;
-			CAN_buffer[1] = 0;
-			createCANMessage(CMD_R, 2, CAN_buffer);
+				/* Send finish command */
+				CAN_buffer[0] = MSG_DONE;
+				CAN_buffer[1] = 0;
+				createCANMessage(CMD_R, 2, CAN_buffer);
 
 			/* Conveyor stopped, give ECTS semaphore */
 			xSemaphoreGive(xSemaphoreRightECTS);
 		}
-
-		vTaskDelayUntil(&xLastFlashTime, 200 / portTICK_RATE_MS);
-	}
 }
 /* ****************************************************************************/
-/* End      :  vConveyorL_task												  */
+/* End      :  vConveyorR_task												  */
 /* ****************************************************************************/
 
