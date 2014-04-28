@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*! \file UART_task.c
 ******************************************************************************
-* \brief Set the string to send in a queue and write it over the UART interface
+* \brief Set the string into a queue and write it over the UART interface
 *
 * Function : Manages the UART communication
 *
@@ -14,12 +14,9 @@
 *
 * \history 07.04.2014 File Created
 *
-*
-* \bug Description of the bug
-*
 */
 /* ****************************************************************************/
-/* Project name																  */
+/* EZBSY Project Robo														  */
 /* ****************************************************************************/
 
 /* --------------------------------- imports ---------------------------------*/
@@ -28,7 +25,7 @@
 #include "stm32f4xx.h"			/* uC includes */
 #include "uart.h"				/*UART imports*/
 #include <stdio.h>              /* Standard Input/Output*/
-#include <string.h>
+#include <string.h>				/* String handling*/
 
 /* application */
 #include "UART_task.h"		/* Own header include */
@@ -49,11 +46,10 @@ static void vUARTTx(void*);
 /* ****************************************************************************/
 
 
-
 /******************************************************************************/
 /* Function:  InitUARTTask													  */
 /******************************************************************************/
-/*! \brief Init the UART HW and data
+/*! \brief Init the UART HW, queue and create the task
 *
 * \return None
 *
@@ -63,8 +59,6 @@ static void vUARTTx(void*);
 *
 * \date 07.04.2014 File Created
 *
-* \bug Description of the bug
-*
 *******************************************************************************/
 
 void InitUARTTask(void)
@@ -72,8 +66,8 @@ void InitUARTTask(void)
 	/* UART HW init's */
 	uart_init();
 
-    /* create the queue */
-    qUARTTx = xQueueCreate(UART_QUEUE_LENGTH,sizeof(char)*UART_MSG_LENGTH); /* TX-Message Queue */
+    /* create the TX queue */
+    qUARTTx = xQueueCreate(UART_QUEUE_LENGTH,sizeof(char)*UART_MSG_LENGTH);
 
     /* create tasks */
     xTaskCreate( vUARTTx, ( signed char * ) UART_TX_TASK_NAME, UART_STACK_SIZE, NULL, UART_TASK_PRIORITY, NULL );
@@ -87,7 +81,7 @@ void InitUARTTask(void)
 /******************************************************************************/
 /* Function:  uart_init														  */
 /******************************************************************************/
-/*! \brief init the HW-layer
+/*! \brief init the HW-layer: Baud 9600, Stop 1, Parity none
 *
 * \return None
 *
@@ -96,8 +90,6 @@ void InitUARTTask(void)
 * \version 0.0.1
 *
 * \date 07.04.2014 File Created
-*
-* \bug Description of the bug
 *
 *******************************************************************************/
 static void uart_init(void) {
@@ -115,7 +107,7 @@ static void uart_init(void) {
 /******************************************************************************/
 /* Function:  createUARTMessage												  */
 /******************************************************************************/
-/*! \brief this function create a UART-message and send it to the message-queue
+/*! \brief this function creates a UART-message and sends it to the message-queue
 *
 * \param[in]   string array of length UART_MSG_LENGTH
 *
@@ -127,13 +119,13 @@ static void uart_init(void) {
 *
 * \date 07.04.2014 File Created
 *
-* \bug Description of the bug
-*
 *******************************************************************************/
 uint8_t createUARTMessage(char data[])
 {
+	/*check if the message is to long*/
 	if(strlen(data) <= UART_MSG_LENGTH){
 
+		/*send message to the queue*/
 		xQueueSendToBack(qUARTTx, data,0);
 		return 1;
 	}
@@ -141,7 +133,6 @@ uint8_t createUARTMessage(char data[])
 
 		return -1;
 	}
-
 }
 /* ****************************************************************************/
 /* End      :  createUARTMessage											  */
@@ -150,7 +141,7 @@ uint8_t createUARTMessage(char data[])
 /******************************************************************************/
 /* Function:  vUARTTx														  */
 /******************************************************************************/
-/*! \brief Transmit task for UART-messages
+/*! \brief Transmit task for the UART-messages
 *
 * \param[in] pvParameters  Pointer for given parameter
 *
@@ -162,12 +153,11 @@ uint8_t createUARTMessage(char data[])
 *
 * \date 07.04.2014 File Created
 *
-* \bug Description of the bug
-*
 *******************************************************************************/
 static void vUARTTx(void* pvParameters )
 {
-	char tx_Message[UART_MSG_LENGTH]; /* buffer for a received UART-message */
+	/* buffer for a received UART-message */
+	char tx_Message[UART_MSG_LENGTH];
     portTickType tx_wait_time;
 
     /* We need to initialise tx_wait_time prior to the first call to vTaskDelayUntil(). */
@@ -183,7 +173,8 @@ static void vUARTTx(void* pvParameters )
             /* transmit the message */
         	printf("%s\n", &tx_Message);
 
-            vTaskDelayUntil( &tx_wait_time, 100 / portTICK_RATE_MS); /* wait for 100ms */
+        	/* wait for 100ms */
+            vTaskDelayUntil( &tx_wait_time, 100 / portTICK_RATE_MS);
         }
     }
 }

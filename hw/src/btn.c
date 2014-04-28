@@ -161,6 +161,7 @@ void EXTI0_IRQHandler(void) {
 	/* Button T3 interrupt on Port I Pin 0 */
 	EXTI_ClearITPendingBit(EXTI_Line0);
 
+	/*fill CAN message for the flipper*/
 	CAN_buffer[0] = MSG_FLIP;
 	CAN_buffer[1] = DB_POS_L;
 	CAN_buffer[2] = DB_SPEED;
@@ -188,6 +189,7 @@ void MyEXTI9_5_IRQHandler(void) {
 
         EXTI_ClearITPendingBit(EXTI_Line7);
 
+        /*fill CAN message for the flipper*/
     	CAN_buffer[0] = MSG_FLIP;
     	CAN_buffer[1] = DB_POS_R;
     	CAN_buffer[2] = DB_SPEED;

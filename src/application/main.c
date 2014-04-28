@@ -2,11 +2,11 @@
 /** \file       main.c
  *******************************************************************************
  *
- *  \brief      This is the freeRTOS base project for CARME-M4.
+ *  \brief      Project to handle the Stellaris robot model
  *
- *  \author     wht4
+ *  \author     plats1,meert1,kasen1,heimg1
  *
- *  \date       22.08.2011
+ *  \date       19.01.2014
  *
  *  \remark     Last Modification
  *               \li wht4, 22.08.2011, Created

@@ -3,11 +3,10 @@
 /******************************************************************************/
 /*! \file UART_task.h
 ******************************************************************************
-* \brief Short description of the files function
+* \brief header for the UART task
 *
-* Function : More detailed description of the files function
-*
-* Procedures : InitUARTTask()
+* Procedures : 	InitUARTTask()
+* 				uint8_t createUARTMessage(char *);
 *
 * \author heimg1
 *
